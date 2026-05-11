@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:"/>
+<title>IRONBEAM</title>
+<style>
+@import url('data:text/css,');
+:root{
+  --bg:#08080f;--bg2:#0f0f1e;--bg3:#1a1a2e;--bg4:#252545;
+  --beam:#e8a020;--beam2:#f5c050;--beam3:rgba(232,160,32,.12);--beam4:rgba(232,160,32,.06);
+  --steel:#e8e8f4;--steel2:rgba(232,232,244,.65);--steel3:rgba(232,232,244,.3);--steel4:rgba(232,232,244,.08);
+  --green:#1d9e75;--green2:rgba(29,158,117,.15);
+  --red:#e24b4a;--red2:rgba(226,75,74,.12);
+  --purple:#7f77dd;
+  --b1:rgba(232,160,32,.2);--b2:rgba(232,232,244,.1);--b3:rgba(232,232,244,.05);
+  --r:10px;--rs:7px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-app-region:no-drag}
+html,body{height:100%;background:var(--bg);color:var(--steel);font-family:-apple-system,'Segoe UI','Helvetica Neue',sans-serif;overflow:hidden;font-size:13px;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;-webkit-appearance:none}
+input{font-family:inherit;outline:none;-webkit-appearance:none}
+
+/* ── TITLEBAR ── */
+.titlebar{
+  height:38px;background:var(--bg2);border-bottom:1px solid var(--b2);
+  display:flex;align-items:center;padding:0 12px 0 16px;
+  -webkit-app-region:drag;flex-shrink:0;gap:10px;
+}
+.tb-logo{display:flex;align-items:center;gap:8px;-webkit-app-region:no-drag}
+.tb-logo svg{width:22px;height:22px}
+.tb-brand{font-size:13px;font-weight:600;letter-spacing:.14em;color:var(--beam2)}
+.tb-spacer{flex:1}
+.tb-status{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--b2);border-radius:20px;padding:4px 10px;-webkit-app-region:no-drag}
+.tb-dot{width:6px;height:6px;border-radius:50%;background:#444;transition:all .3s}
+.tb-dot.on{background:var(--green);box-shadow:0 0 5px var(--green)}
+.tb-dot.pulse{animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 5px var(--green)}50%{box-shadow:0 0 12px var(--green)}}
+.tb-status-text{font-size:11px;color:var(--steel2)}
+.win-controls{display:flex;gap:2px;-webkit-app-region:no-drag}
+.wc{width:28px;height:22px;background:transparent;border:none;border-radius:4px;font-size:11px;color:var(--steel3);cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.wc:hover{background:var(--bg4);color:var(--steel)}
+.wc.close:hover{background:var(--red);color:white}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 38px)}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--bg2);border-right:1px solid var(--b2);display:flex;flex-direction:column;overflow:hidden}
+.sb-section{padding:12px 10px 6px;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel3);font-weight:600}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  border-radius:var(--rs);margin:1px 6px;cursor:pointer;
+  color:var(--steel2);font-size:13px;transition:all .15s;
+}
+.nav-item:hover{background:var(--bg3);color:var(--steel)}
+.nav-item.active{background:var(--beam3);color:var(--beam2)}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-bottom{margin-top:auto;padding:10px;border-top:1px solid var(--b2)}
+.device-card{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px}
+.dc-head{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.dc-dot{width:7px;height:7px;border-radius:50%;background:#444}
+.dc-dot.on{background:var(--green);box-shadow:0 0 4px var(--green)}
+.dc-label{font-size:11px;font-weight:600;color:var(--steel)}
+.dc-ip{font-size:10px;color:var(--steel3);font-family:'SF Mono','Consolas',monospace}
+
+/* ── MAIN AREA ── */
+.main{display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+.panel{display:none;flex:1;overflow:hidden}.panel.active{display:flex;flex-direction:column}
+
+/* ── PANEL HEADER ── */
+.panel-header{padding:20px 24px 16px;border-bottom:1px solid var(--b2);flex-shrink:0}
+.panel-title{font-size:18px;font-weight:600;color:var(--steel);letter-spacing:-.01em}
+.panel-sub{font-size:12px;color:var(--steel3);margin-top:3px}
+
+/* ── TRANSFER PANEL ── */
+.transfer-layout{display:grid;grid-template-columns:1fr 64px 1fr;flex:1;overflow:hidden}
+.transfer-side{display:flex;flex-direction:column;overflow:hidden}
+.ts-head{padding:14px 16px;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ts-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--steel3)}
+.ts-action{font-size:11px;padding:4px 10px;background:var(--bg3);border:1px solid var(--b2);border-radius:20px;color:var(--steel2);cursor:pointer;transition:all .15s}
+.ts-action:hover{border-color:var(--b1);color:var(--beam2)}
+.file-scroll{flex:1;overflow-y:auto;padding:8px}
+.file-scroll::-webkit-scrollbar{width:4px}
+.file-scroll::-webkit-scrollbar-track{background:transparent}
+.file-scroll::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.file-card{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;
+  border-radius:var(--rs);border:1px solid transparent;
+  cursor:pointer;transition:all .15s;margin-bottom:2px;
+}
+.file-card:hover{background:var(--bg3);border-color:var(--b2)}
+.file-card.new{animation:arrive .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes arrive{0%{transform:scale(.8) translateY(8px);opacity:0}100%{transform:scale(1);opacity:1}}
+.fc-icon{width:34px;height:34px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fc-meta{flex:1;min-width:0}
+.fc-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--steel)}
+.fc-size{font-size:10px;color:var(--steel3);margin-top:1px}
+.fc-actions{display:none;gap:4px;flex-shrink:0}
+.file-card:hover .fc-actions{display:flex}
+.fc-btn{width:24px;height:24px;border-radius:5px;background:transparent;border:none;font-size:13px;color:var(--steel3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.fc-btn:hover{background:var(--bg4);color:var(--steel)}
+.fc-btn.del:hover{color:var(--red)}
+
+.empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--steel3);padding:20px;text-align:center}
+.empty-state svg{width:32px;height:32px;opacity:.3}
+.empty-state p{font-size:12px}
+
+/* Transfer middle column */
+.xfer-middle{
+  border-left:1px solid var(--b2);border-right:1px solid var(--b2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:var(--bg);padding:8px;
+}
+.xfer-btn{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg3);border:1px solid var(--b2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;transition:all .2s;color:var(--steel3);
+}
+.xfer-btn:hover{background:var(--beam3);border-color:var(--b1);color:var(--beam2);transform:scale(1.08)}
+.xfer-stats{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:8px}
+.xs-val{font-size:15px;font-weight:600;color:var(--beam2);font-variant-numeric:tabular-nums}
+.xs-lbl{font-size:9px;color:var(--steel3);letter-spacing:.1em;text-transform:uppercase}
+
+/* ── PROGRESS ── */
+.progress-overlay{
+  position:absolute;bottom:0;left:0;right:0;
+  background:var(--bg2);border-top:1px solid var(--b2);
+  padding:10px 14px;display:none;
+}
+.progress-overlay.show{display:block}
+.po-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.po-name{font-size:12px;font-weight:500;color:var(--beam2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%}
+.po-pct{font-size:12px;font-weight:600;color:var(--beam2);font-variant-numeric:tabular-nums}
+.po-bar{height:4px;background:var(--bg4);border-radius:2px}
+.po-fill{height:100%;background:var(--beam);border-radius:2px;transition:width .15s}
+.po-speed{font-size:10px;color:var(--steel3);margin-top:4px}
+
+/* ── CONNECT PANEL ── */
+.connect-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;gap:24px}
+.ch-logo{width:80px;height:80px;background:var(--bg3);border:1px solid var(--b1);border-radius:20px;display:flex;align-items:center;justify-content:center}
+.ch-title{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.ch-sub{font-size:13px;color:var(--steel2);text-align:center;max-width:360px;line-height:1.6}
+.qr-wrap{background:var(--bg3);border:1px solid var(--b1);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.qr-placeholder{width:120px;height:120px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.qr-img{width:120px;height:120px;border-radius:4px;display:none}
+.qr-label{font-size:10px;color:var(--steel3);letter-spacing:.1em;text-transform:uppercase}
+.qr-url{font-size:11px;color:var(--beam2);font-family:'SF Mono','Consolas',monospace}
+.steps-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;max-width:560px}
+.step-card{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:6px}
+.step-num{font-size:18px;font-weight:700;color:var(--beam3-text, #e8a020);opacity:.4}
+.step-text{font-size:12px;color:var(--steel2);line-height:1.5}
+
+/* ── FILES PANEL ── */
+.files-toolbar{padding:12px 16px;border-bottom:1px solid var(--b2);display:flex;align-items:center;gap:8px;flex-shrink:0}
+.search-box{flex:1;background:var(--bg3);border:1px solid var(--b2);border-radius:var(--rs);padding:7px 12px;font-size:12px;color:var(--steel);transition:border-color .15s}
+.search-box:focus{border-color:var(--b1);background:var(--bg4)}
+.search-box::placeholder{color:var(--steel3)}
+.toolbar-btn{padding:7px 14px;background:var(--bg3);border:1px solid var(--b2);border-radius:var(--rs);font-size:12px;color:var(--steel2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.toolbar-btn:hover{border-color:var(--b1);color:var(--beam2)}
+.files-list{flex:1;overflow-y:auto;padding:8px}
+.files-list::-webkit-scrollbar{width:4px}
+.files-list::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
+.file-row{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;
+  border-radius:var(--r);border:1px solid transparent;
+  cursor:pointer;transition:all .15s;margin-bottom:2px;
+}
+.file-row:hover{background:var(--bg3);border-color:var(--b2)}
+.fr-icon{width:38px;height:38px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.fr-meta{flex:1;min-width:0}
+.fr-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--steel)}
+.fr-info{font-size:11px;color:var(--steel3);margin-top:1px}
+.fr-actions{display:none;gap:4px;flex-shrink:0}
+.file-row:hover .fr-actions{display:flex}
+.fr-btn{width:26px;height:26px;border-radius:5px;background:transparent;border:none;font-size:13px;color:var(--steel3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.fr-btn:hover{background:var(--bg4);color:var(--steel)}
+.fr-btn.del:hover{color:var(--red)}
+
+/* ── SETTINGS PANEL ── */
+.settings-body{flex:1;overflow-y:auto;padding:20px 24px}
+.setting-group{margin-bottom:24px}
+.sg-title{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--steel3);margin-bottom:10px}
+.setting-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--b2)}
+.setting-row:last-child{border-bottom:none}
+.sr-label{flex:1;font-size:13px;color:var(--steel)}
+.sr-val{font-size:12px;color:var(--steel2);font-family:'SF Mono','Consolas',monospace;text-align:right}
+.sr-val.highlight{color:var(--beam2)}
+.copy-btn{padding:4px 10px;background:transparent;border:1px solid var(--b2);border-radius:20px;font-size:11px;color:var(--steel3);cursor:pointer;margin-left:8px;transition:all .15s}
+.copy-btn:hover{border-color:var(--b1);color:var(--beam2)}
+
+/* ── TOAST ── */
+.toast-wrap{position:fixed;bottom:16px;right:16px;display:flex;flex-direction:column;gap:6px;z-index:1000}
+.toast{
+  background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r);
+  padding:10px 14px;font-size:12px;color:var(--steel);
+  display:flex;align-items:center;gap:8px;max-width:280px;
+  animation:toast-in .2s ease;
+}
+.toast.ok{border-color:rgba(29,158,117,.4)}
+.toast.err{border-color:rgba(226,75,74,.4)}
+@keyframes toast-in{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ── NOTIFICATION BADGE ── */
+.badge{
+  min-width:16px;height:16px;background:var(--green);border-radius:8px;
+  font-size:9px;font-weight:700;color:white;
+  display:flex;align-items:center;justify-content:center;padding:0 4px;
+}
+</style>
+</head>
+<body>
+
+<!-- Titlebar -->
+<div class="titlebar">
+  <div class="tb-logo">
+    <svg viewBox="0 0 22 22" fill="none">
+      <path d="M3 11 L11 2 L19 11 L11 20 Z" stroke="#e8a020" stroke-width="1.8" stroke-linejoin="round"/>
+      <path d="M11 2 L11 20M3 11 L19 11" stroke="#c07010" stroke-width=".8" stroke-dasharray="2 2"/>
+      <circle cx="11" cy="11" r="2.5" fill="#e8a020"/>
+    </svg>
+    <span class="tb-brand">IRONBEAM</span>
+  </div>
+  <div class="tb-spacer"></div>
+  <div class="tb-status">
+    <div class="tb-dot" id="tbDot"></div>
+    <span class="tb-status-text" id="tbStatus">Starting...</span>
+  </div>
+  <div class="win-controls">
+    <button class="wc" onclick="IB.minimize()" title="Minimize">─</button>
+    <button class="wc" onclick="IB.maximize()" title="Maximize">□</button>
+    <button class="wc close" onclick="IB.hide()" title="Close to tray">✕</button>
+  </div>
+</div>
+
+<!-- Main layout -->
+<div class="layout">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sb-section">Navigation</div>
+    <div class="nav-item active" data-panel="transfer" onclick="switchPanel('transfer')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M2 8 L6 4 L10 8M6 4 L6 12M14 8 L10 12 L6 8" opacity=".5"/>
+        <path d="M2 8h4M10 8h4"/>
+      </svg>
+      Transfer
+    </div>
+    <div class="nav-item" data-panel="files" onclick="switchPanel('files')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <rect x="2" y="3" width="12" height="10" rx="1.5"/>
+        <path d="M5 7h6M5 10h4"/>
+      </svg>
+      Files
+      <span class="badge" id="filesBadge" style="display:none;margin-left:auto"></span>
+    </div>
+    <div class="nav-item" data-panel="connect" onclick="switchPanel('connect')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="5" cy="8" r="2"/><circle cx="11" cy="5" r="2"/><circle cx="11" cy="11" r="2"/>
+        <path d="M7 7.3 L9.3 6M7 8.7 L9.3 10"/>
+      </svg>
+      Connect iPhone
+    </div>
+    <div class="nav-item" data-panel="settings" onclick="switchPanel('settings')">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="8" cy="8" r="2.5"/>
+        <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4"/>
+      </svg>
+      Settings
+    </div>
+
+    <div class="nav-bottom">
+      <div class="device-card">
+        <div class="dc-head">
+          <div class="dc-dot" id="deviceDot"></div>
+          <span class="dc-label" id="deviceLabel">No device</span>
+        </div>
+        <div class="dc-ip" id="deviceIp">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="main">
+
+    <!-- TRANSFER PANEL -->
+    <div class="panel active" id="panel-transfer" style="position:relative">
+      <div class="panel-header">
+        <div class="panel-title">Transfer</div>
+        <div class="panel-sub">Drag files between your devices</div>
+      </div>
+      <div class="transfer-layout" style="flex:1;overflow:hidden">
+        <!-- Desktop side -->
+        <div class="transfer-side">
+          <div class="ts-head">
+            <span class="ts-label">💻 Desktop</span>
+            <button class="ts-action" onclick="IB.openTransferFolder()">Open folder</button>
+          </div>
+          <div class="file-scroll" id="desktopFiles">
+            <div class="empty-state" id="desktopEmpty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M3 7l9 6 9-6"/></svg>
+              <p>Files received from iPhone<br/>will appear here</p>
+            </div>
+          </div>
+        </div>
+        <!-- Middle arrows -->
+        <div class="xfer-middle">
+          <div class="xfer-btn" title="Send to iPhone" onclick="showToast('Select a file on desktop to send to iPhone')">←</div>
+          <div class="xfer-btn" title="Receive from iPhone" onclick="refreshDesktopFiles()">→</div>
+          <div class="xfer-stats">
+            <div class="xs-val" id="xferCount">0</div>
+            <div class="xs-lbl">transfers</div>
+          </div>
+          <div class="xfer-stats">
+            <div class="xs-val" id="xferSize">0 B</div>
+            <div class="xs-lbl">total</div>
+          </div>
+        </div>
+        <!-- iPhone side -->
+        <div class="transfer-side">
+          <div class="ts-head">
+            <span class="ts-label">📱 iPhone</span>
+            <span style="font-size:10px;color:var(--steel3)" id="phoneConnStatus">Not connected</span>
+          </div>
+          <div class="file-scroll" id="phoneFiles">
+            <div class="empty-state" id="phoneEmpty">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+              <p>Connect your iPhone<br/>to see its files here</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Transfer progress bar -->
+      <div class="progress-overlay" id="progressOverlay">
+        <div class="po-row">
+          <span class="po-name" id="poName">Transferring...</span>
+          <span class="po-pct" id="poPct">0%</span>
+        </div>
+        <div class="po-bar"><div class="po-fill" id="poFill" style="width:0%"></div></div>
+        <div class="po-speed" id="poSpeed">Calculating...</div>
+      </div>
+    </div>
+
+    <!-- FILES PANEL -->
+    <div class="panel" id="panel-files">
+      <div class="panel-header">
+        <div class="panel-title">Files</div>
+        <div class="panel-sub" id="filesCount">0 files in transfer folder</div>
+      </div>
+      <div class="files-toolbar">
+        <input class="search-box" type="text" id="fileSearch" placeholder="Search files..." oninput="filterFiles()"/>
+        <button class="toolbar-btn" onclick="IB.openTransferFolder()">Open folder</button>
+        <button class="toolbar-btn" onclick="refreshDesktopFiles()">Refresh</button>
+      </div>
+      <div class="files-list" id="filesList">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+          <p>No files yet — send something from your iPhone</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONNECT PANEL -->
+    <div class="panel" id="panel-connect">
+      <div class="connect-hero">
+        <div class="ch-logo">
+          <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+            <path d="M6 22 L22 4 L38 22 L22 40 Z" stroke="#e8a020" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M22 4 L22 40M6 22 L38 22" stroke="#c07010" stroke-width="1" stroke-dasharray="3 3"/>
+            <circle cx="22" cy="22" r="5" fill="#e8a020"/>
+            <circle cx="22" cy="4" r="3" fill="#f5c050"/>
+            <circle cx="6" cy="22" r="3" fill="#f5c050"/>
+            <circle cx="38" cy="22" r="3" fill="#f5c050"/>
+            <circle cx="22" cy="40" r="3" fill="#f5c050"/>
+          </svg>
+        </div>
+        <div>
+          <div class="ch-title">Connect your iPhone</div>
+          <div class="ch-sub" style="margin-top:6px">Open Safari on your iPhone and navigate to the address below. Both devices must be on the same Wi-Fi network.</div>
+        </div>
+        <div class="qr-wrap">
+          <div class="qr-placeholder" id="qrPlaceholder">📱</div>
+          <img class="qr-img" id="qrImg" alt="QR code"/>
+          <div class="qr-label">Open in iPhone Safari</div>
+          <div class="qr-url" id="connectUrl">Starting server...</div>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <div class="step-text">Open the URL above in iPhone Safari — tap the address bar and type it in</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <div class="step-text">First time only: install the IRONBEAM certificate via Settings when prompted</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <div class="step-text">Enter your IP address in the app and tap Connect — green dot means you're live</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div class="panel" id="panel-settings">
+      <div class="panel-header">
+        <div class="panel-title">Settings</div>
+      </div>
+      <div class="settings-body">
+        <div class="setting-group">
+          <div class="sg-title">Network</div>
+          <div class="setting-row"><span class="sr-label">Your IP address</span><span class="sr-val highlight" id="setIp">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setIp').textContent)">Copy</button></div>
+          <div class="setting-row"><span class="sr-label">iPhone URL</span><span class="sr-val highlight" id="setUrl">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setUrl').textContent)">Copy</button></div>
+          <div class="setting-row"><span class="sr-label">HTTPS port</span><span class="sr-val">7443</span></div>
+          <div class="setting-row"><span class="sr-label">Status</span><span class="sr-val highlight" id="setStatus">Starting...</span></div>
+        </div>
+        <div class="setting-group">
+          <div class="sg-title">Storage</div>
+          <div class="setting-row"><span class="sr-label">Transfer folder</span><span class="sr-val" id="setDir" style="max-width:260px;overflow:hidden;text-overflow:ellipsis">—</span></div>
+          <div class="setting-row"><span class="sr-label">Files stored</span><span class="sr-val" id="setCount">0</span></div>
+        </div>
+        <div class="setting-group">
+          <div class="sg-title">About</div>
+          <div class="setting-row"><span class="sr-label">Version</span><span class="sr-val">2.0.0</span></div>
+          <div class="setting-row"><span class="sr-label">Protocol</span><span class="sr-val">UTP/1.0 · HTTPS · AES-256</span></div>
+          <div class="setting-row"><span class="sr-label">Copyright</span><span class="sr-val">© 2025 IRONBEAM Technologies</span></div>
+          <div class="setting-row"><span class="sr-label">Website</span><span class="sr-val highlight">ironbeam.ca</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+const IB_IS_ELECTRON = typeof window.IB !== 'undefined';
+let state = {
+  files: [],
+  totalTransfers: 0,
+  totalBytes: 0,
+  serverInfo: null,
+};
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  if (IB_IS_ELECTRON) {
+    // Listen for events from main process
+    IB.on('server-ready',         onServerReady);
+    IB.on('file-received',        onFileReceived);
+    IB.on('device-connected',     onDeviceConnected);
+    IB.on('device-disconnected',  onDeviceDisconnected);
+    IB.on('fs-change',            onFsChange);
+
+    // Get initial info
+    const info = await IB.getInfo();
+    if (info) onServerReady(info);
+    await refreshDesktopFiles();
+  } else {
+    // Browser preview mode
+    onServerReady({ ip: '10.0.0.21', portHttps: 7443, portHttp: 7878, transferDir: '~/IRONBEAM', connectedDevices: 0 });
+  }
+});
+
+// ── Server ready ──────────────────────────────────────────────────────────────
+function onServerReady(info) {
+  state.serverInfo = info;
+  const url = `https://${info.ip}:${info.portHttps}/phone`;
+
+  document.getElementById('tbDot').className = 'tb-dot on pulse';
+  document.getElementById('tbStatus').textContent = `Ready · ${info.ip}`;
+  document.getElementById('connectUrl').textContent = url;
+  document.getElementById('deviceIp').textContent = `${info.ip}:${info.portHttps}`;
+  document.getElementById('setIp').textContent = info.ip;
+  document.getElementById('setUrl').textContent = url;
+  document.getElementById('setDir').textContent = info.transferDir;
+  document.getElementById('setStatus').textContent = 'Running';
+}
+
+// ── Device connection ─────────────────────────────────────────────────────────
+function onDeviceConnected(data) {
+  document.getElementById('deviceDot').className = 'dc-dot on';
+  document.getElementById('deviceLabel').textContent = `${data.count} connected`;
+  document.getElementById('phoneConnStatus').textContent = `${data.count} device connected`;
+  document.getElementById('phoneEmpty').querySelector('p').textContent = 'Device connected — files sent from iPhone appear here';
+  showToast(`📱 iPhone connected`, 'ok');
+}
+
+function onDeviceDisconnected(data) {
+  if (data.count === 0) {
+    document.getElementById('deviceDot').className = 'dc-dot';
+    document.getElementById('deviceLabel').textContent = 'No device';
+    document.getElementById('phoneConnStatus').textContent = 'Not connected';
+  }
+  showToast('📴 iPhone disconnected');
+}
+
+// ── File received ─────────────────────────────────────────────────────────────
+function onFileReceived(data) {
+  state.totalTransfers++;
+  state.totalBytes += data.size || 0;
+  document.getElementById('xferCount').textContent = state.totalTransfers;
+  document.getElementById('xferSize').textContent = fmt(state.totalBytes);
+  showToast(`✓ Received: ${data.name}`, 'ok');
+  refreshDesktopFiles(data.name);
+  // Flash the files badge
+  const badge = document.getElementById('filesBadge');
+  badge.style.display = 'flex';
+  badge.textContent = state.totalTransfers > 99 ? '99+' : state.totalTransfers;
+}
+
+function onFsChange() {
+  refreshDesktopFiles();
+}
+
+// ── File management ───────────────────────────────────────────────────────────
+async function refreshDesktopFiles(newFileName) {
+  let files;
+  if (IB_IS_ELECTRON) {
+    files = await IB.listFiles();
+  } else {
+    files = [
+      { name: 'vacation-photo.jpg', size: 2145678, modified: Date.now() - 1000 },
+      { name: 'document.pdf',       size: 524288,  modified: Date.now() - 5000 },
+      { name: 'video-clip.mp4',     size: 15728640,modified: Date.now() - 10000 },
+    ];
+  }
+  state.files = files;
+  renderDesktopFiles(newFileName);
+  renderFilesList();
+  document.getElementById('filesCount').textContent = `${files.length} file${files.length !== 1 ? 's' : ''} in transfer folder`;
+  document.getElementById('setCount').textContent = files.length;
+}
+
+function renderDesktopFiles(newFileName) {
+  const container = document.getElementById('desktopFiles');
+  const empty     = document.getElementById('desktopEmpty');
+  if (!state.files.length) { empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+  container.innerHTML = '';
+  container.appendChild(empty);
+  state.files.forEach(f => {
+    const card = document.createElement('div');
+    card.className = 'file-card' + (f.name === newFileName ? ' new' : '');
+    card.innerHTML = `
+      <div class="fc-icon">${emoji(f.name)}</div>
+      <div class="fc-meta">
+        <div class="fc-name">${esc(f.name)}</div>
+        <div class="fc-size">${fmt(f.size)} · ${timeAgo(f.modified)}</div>
+      </div>
+      <div class="fc-actions">
+        <button class="fc-btn" title="Open" onclick="openFile('${esc(f.name)}')">↗</button>
+        <button class="fc-btn del" title="Delete" onclick="deleteFile('${esc(f.name)}')">✕</button>
+      </div>`;
+    card.addEventListener('click', e => { if (!e.target.closest('.fc-actions')) openFile(f.name); });
+    container.appendChild(card);
+  });
+}
+
+function renderFilesList() {
+  const query   = document.getElementById('fileSearch')?.value?.toLowerCase() || '';
+  const list    = document.getElementById('filesList');
+  const filtered = state.files.filter(f => f.name.toLowerCase().includes(query));
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state"><p>No files found</p></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(f => `
+    <div class="file-row" onclick="openFile('${esc(f.name)}')">
+      <div class="fr-icon">${emoji(f.name)}</div>
+      <div class="fr-meta">
+        <div class="fr-name">${esc(f.name)}</div>
+        <div class="fr-info">${fmt(f.size)} · ${timeAgo(f.modified)}</div>
+      </div>
+      <div class="fr-actions">
+        <button class="fr-btn" title="Open" onclick="event.stopPropagation();openFile('${esc(f.name)}')">↗</button>
+        <button class="fr-btn del" title="Delete" onclick="event.stopPropagation();deleteFile('${esc(f.name)}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterFiles() { renderFilesList(); }
+
+async function openFile(name) {
+  if (IB_IS_ELECTRON) await IB.openFile(name);
+  else showToast(`Opening ${name}...`);
+}
+
+async function deleteFile(name) {
+  if (!confirm(`Delete "${name}"?`)) return;
+  if (IB_IS_ELECTRON) {
+    const ok = await IB.deleteFile(name);
+    if (ok) { showToast(`Deleted ${name}`); await refreshDesktopFiles(); }
+    else showToast('Could not delete file', 'err');
+  } else {
+    state.files = state.files.filter(f => f.name !== name);
+    renderDesktopFiles();
+    renderFilesList();
+    showToast(`Deleted ${name}`);
+  }
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function switchPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelector(`[data-panel="${name}"]`)?.classList.add('active');
+  if (name === 'files') { refreshDesktopFiles(); document.getElementById('filesBadge').style.display = 'none'; }
+  if (name === 'connect') renderQR();
+}
+
+// ── QR code (simple SVG placeholder) ─────────────────────────────────────────
+function renderQR() {
+  // Show the URL clearly — actual QR would need a library
+  const url = document.getElementById('connectUrl').textContent;
+  if (url && url !== 'Starting server...') {
+    document.getElementById('qrPlaceholder').textContent = '📱';
+    document.getElementById('qrPlaceholder').style.display = 'flex';
+  }
+}
+
+// ── Clipboard ─────────────────────────────────────────────────────────────────
+async function copyToClipboard(text) {
+  try { await navigator.clipboard.writeText(text); showToast('Copied!', 'ok'); }
+  catch { showToast('Could not copy', 'err'); }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type) {
+  const wrap = document.getElementById('toastWrap');
+  const el   = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.style.opacity = '0', 2800);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmt(b) {
+  if (!b||b<0) return '–';
+  if (b<1024) return Math.round(b)+' B';
+  if (b<1048576) return Math.round(b/1024)+' KB';
+  if (b<1073741824) return (b/1048576).toFixed(1)+' MB';
+  return (b/1073741824).toFixed(2)+' GB';
+}
+function emoji(n) {
+  const e=(n.split('.').pop()||'').toLowerCase();
+  return {jpg:'🖼️',jpeg:'🖼️',png:'🖼️',heic:'🖼️',gif:'🎞️',mp4:'🎬',mov:'🎬',mp3:'🎵',wav:'🎵',pdf:'📄',doc:'📋',docx:'📋',xls:'📊',xlsx:'📊',txt:'📝',zip:'🗜️',rar:'🗜️'}[e]||'📁';
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function timeAgo(ts) {
+  const s=Math.round((Date.now()-ts)/1000);
+  if(s<60)return'just now';if(s<3600)return Math.round(s/60)+'m ago';
+  if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago';
+}
+</script>
+</body>
+</html>

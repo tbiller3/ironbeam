@@ -1,0 +1,16 @@
+IRONBEAM Technologies - End User License Agreement
+
+Copyright (c) 2025 IRONBEAM Technologies (ironbeam.ca)
+All rights reserved.
+
+IRONBEAM is a local network file transfer application. By installing this
+software, you agree to the following terms:
+
+1. This software is provided for personal and commercial use.
+2. You may not redistribute, sell, or modify this software without permission.
+3. This software transfers files over your local network only.
+4. No data is sent to external servers.
+5. The software is provided "as is" without warranty of any kind.
+
+For support: support@ironbeam.ca
+Website: https://ironbeam.ca

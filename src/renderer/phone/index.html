@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="IRONBEAM"/>
+<meta name="theme-color" content="#08080f"/>
+<title>IRONBEAM</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#08080f;--bg2:#0f0f1e;--bg3:#1a1a2e;
+  --beam:#e8a020;--beam2:#f5c050;
+  --steel:#e8e8f4;--steel2:rgba(232,232,244,.65);--steel3:rgba(232,232,244,.3);
+  --green:#1d9e75;--red:#e24b4a;
+  --b1:rgba(232,160,32,.2);--b2:rgba(232,232,244,.1);
+  --st:env(safe-area-inset-top,44px);--sb:env(safe-area-inset-bottom,20px);
+}
+html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-family:-apple-system,'Helvetica Neue',sans-serif;overflow:hidden;-webkit-text-size-adjust:100%}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;background:var(--bg)}
+.screen.active{display:flex}
+
+/* Connect screen */
+.cs{align-items:center;justify-content:center;padding:20px}
+.cw{width:100%;max-width:360px}
+.cl{text-align:center;margin-bottom:28px}
+.clb{width:72px;height:72px;border-radius:18px;background:var(--bg3);border:1.5px solid var(--b1);margin:0 auto 12px;display:flex;align-items:center;justify-content:center}
+.cbr{font-size:24px;font-weight:700;letter-spacing:.18em;color:var(--beam2)}
+.cbs{font-size:10px;letter-spacing:.14em;color:var(--steel3);margin-top:3px}
+.cc{background:var(--bg2);border:1px solid var(--b2);border-radius:16px;padding:22px}
+.cc h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.cc p{font-size:13px;color:var(--steel2);margin-bottom:18px;line-height:1.5}
+.fl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel3);margin-bottom:7px;display:block}
+.ir{display:flex;gap:8px;margin-bottom:6px}
+.ii{flex:1;background:var(--bg3);border:1.5px solid var(--b2);border-radius:10px;padding:13px 14px;font-size:17px;color:var(--steel);outline:none;-webkit-appearance:none;font-family:inherit;transition:border-color .15s}
+.ii:focus{border-color:var(--beam)}
+.ii::placeholder{color:rgba(232,232,244,.2)}
+.cb{background:var(--beam);color:#08080f;border:none;border-radius:10px;padding:13px 16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;-webkit-appearance:none}
+.cb:active{opacity:.85}
+.ch{font-size:11px;color:var(--steel3);text-align:center;margin-top:8px}
+.steps{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.sr{display:flex;gap:10px;align-items:flex-start;background:var(--bg3);border-radius:10px;padding:10px 12px}
+.sn{width:20px;height:20px;border-radius:50%;background:rgba(232,160,32,.15);color:var(--beam2);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.st{font-size:12px;color:var(--steel2);line-height:1.5}
+
+/* App screen */
+.sb2{height:calc(var(--st) + 8px);background:var(--bg2);display:flex;align-items:flex-end;justify-content:space-between;padding:0 18px 6px;flex-shrink:0}
+.sbt{font-size:15px;font-weight:600}
+.hd{background:var(--bg2);border-bottom:1px solid var(--b2);padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.hl{width:30px;height:30px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center}
+.ht{font-size:18px;font-weight:700;letter-spacing:.12em;color:var(--beam2)}
+.hc{margin-left:auto;display:flex;align-items:center;gap:5px;background:var(--bg3);border:1px solid var(--b2);border-radius:20px;padding:5px 11px}
+.dot{width:7px;height:7px;border-radius:50%;background:#444;transition:background .3s}
+.dot.on{background:var(--green);box-shadow:0 0 5px var(--green)}
+.dlb{font-size:11px;color:var(--steel2)}
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--b2);flex-shrink:0}
+.tab{flex:1;padding:10px 0 8px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--steel3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab.active{color:var(--beam2);border-bottom-color:var(--beam)}
+.ti{font-size:18px;display:block;margin-bottom:2px}
+.cnt{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg)}
+.inn{padding:14px 16px;display:flex;flex-direction:column;gap:12px;padding-bottom:calc(80px + var(--sb))}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--bg2);border:1px solid var(--b2);border-radius:14px;overflow:hidden}
+.ct{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--steel3);font-weight:600;padding:12px 14px 0}
+
+/* Upload zone */
+.uz{margin:0;border:1.5px dashed rgba(232,160,32,.25);border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;background:rgba(232,160,32,.02)}
+.uz:active{background:rgba(232,160,32,.06)}
+.uzi{font-size:34px;margin-bottom:8px}
+.uzt{font-size:16px;font-weight:700;color:var(--beam2);margin-bottom:4px}
+.uzs{font-size:13px;color:var(--steel2);line-height:1.5}
+
+/* Transfer progress */
+.xc{background:rgba(232,160,32,.08);border:1px solid var(--b1);border-radius:12px;padding:14px;display:none}
+.xc.show{display:block}
+.xt{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.xn{font-size:13px;font-weight:600;color:var(--beam2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:75%}
+.xp{font-size:13px;font-weight:700;color:var(--beam2)}
+.xb{height:5px;background:rgba(232,160,32,.15);border-radius:3px}
+.xf{height:100%;background:var(--beam);border-radius:3px;transition:width .1s;width:0%}
+.xs{font-size:11px;color:var(--steel2);margin-top:5px}
+
+/* File rows */
+.fr{display:flex;align-items:center;gap:11px;padding:12px 14px;border-bottom:1px solid var(--b2);cursor:pointer;transition:background .15s}
+.fr:last-child{border-bottom:none}
+.fr:active{background:var(--bg3)}
+.fi{width:38px;height:38px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.fm{flex:1;min-width:0}
+.fn{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.fo{font-size:11px;color:var(--steel2)}
+.fa{font-size:20px;color:var(--beam);flex-shrink:0}
+
+/* Stats */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sv{background:var(--bg2);border:1px solid var(--b2);border-radius:12px;padding:14px}
+.svv{font-size:22px;font-weight:700;color:var(--beam2);margin-bottom:3px}
+.svl{font-size:10px;color:var(--steel3);letter-spacing:.08em;text-transform:uppercase}
+
+/* Settings */
+.row{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--b2)}
+.row:last-child{border-bottom:none}
+.rl{font-size:14px;font-weight:500}
+.rv{font-size:13px;color:var(--steel2);text-align:right;max-width:200px;word-break:break-all}
+
+/* Bottom bar */
+.bb{position:fixed;bottom:0;left:0;right:0;padding:10px 16px;padding-bottom:calc(10px + var(--sb));background:var(--bg2);border-top:1px solid var(--b2);display:flex;gap:8px;z-index:50}
+.bb button{flex:1;padding:14px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;font-family:inherit;-webkit-appearance:none}
+.bb button:active{opacity:.8}
+.bbp{background:var(--beam);color:#08080f}
+.bbs{background:var(--bg3);color:var(--beam2);border:1px solid var(--b1) !important}
+
+/* Toast */
+.toast{position:fixed;top:calc(var(--st) + 60px);left:16px;right:16px;background:var(--bg3);border:1px solid var(--b2);border-radius:12px;padding:12px 16px;font-size:13px;text-align:center;z-index:999;transform:translateY(-10px);opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(29,158,117,.4);color:#5dcaa5}
+.toast.err{border-color:rgba(226,75,74,.4);color:#f09595}
+.disc{width:100%;padding:14px;background:rgba(226,75,74,.08);border:1px solid rgba(226,75,74,.25);border-radius:12px;color:var(--red);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;-webkit-appearance:none;margin-top:4px}
+</style>
+</head>
+<body>
+
+<!-- CONNECT SCREEN -->
+<div class="screen cs active" id="sConnect">
+<div class="cw">
+  <div class="cl">
+    <div class="clb">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+        <path d="M6 20 L20 5 L34 20 L20 35 Z" stroke="#e8a020" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+        <path d="M20 5 L20 35M6 20 L34 20" stroke="#c07010" stroke-width="1" stroke-dasharray="3 3"/>
+        <circle cx="20" cy="20" r="4" fill="#e8a020"/>
+      </svg>
+    </div>
+    <div class="cbr">IRONBEAM</div>
+    <div class="cbs">UNRESTRICTED TRANSFER</div>
+  </div>
+  <div class="cc">
+    <h2>Connect to Desktop</h2>
+    <p>Enter your laptop IP shown in the IRONBEAM server window on your HP laptop</p>
+    <label class="fl">Desktop IP Address</label>
+    <div class="ir">
+      <input class="ii" type="text" id="ipInput" placeholder="10.0.0.21"
+        inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <button class="cb" id="connBtn" onclick="connect()">Connect</button>
+    </div>
+    <div class="ch">Same Wi-Fi network required · Port 7443</div>
+    <div class="steps">
+      <div class="sr"><div class="sn">1</div><div class="st">IRONBEAM server must be running on your HP laptop</div></div>
+      <div class="sr"><div class="sn">2</div><div class="st">iPhone and laptop on the <strong style="color:var(--beam2)">same Wi-Fi</strong></div></div>
+      <div class="sr"><div class="sn">3</div><div class="st">Enter the IP shown in the server window: <strong style="color:var(--beam2)">10.0.0.21</strong></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- APP SCREEN -->
+<div class="screen" id="sApp">
+  <div class="sb2"><span class="sbt" id="sbTime">9:41</span><span style="font-size:12px;color:var(--steel2)">▲ ●●● 🔋</span></div>
+  <div class="hd">
+    <div class="hl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12 L12 3 L20 12 L12 21 Z" stroke="#e8a020" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="#e8a020"/></svg></div>
+    <span class="ht">IRONBEAM</span>
+    <div class="hc"><div class="dot on" id="dot"></div><span class="dlb" id="dlb">Connected</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-tab="send"><span class="ti">↑</span>Send</div>
+    <div class="tab" data-tab="receive"><span class="ti">↓</span>Receive</div>
+    <div class="tab" data-tab="history"><span class="ti">☰</span>History</div>
+    <div class="tab" data-tab="settings"><span class="ti">⚙</span>Settings</div>
+  </div>
+  <div class="cnt">
+    <div class="inn">
+
+      <!-- SEND -->
+      <div class="panel active" id="panel-send">
+        <div class="xc" id="xc"><div class="xt"><span class="xn" id="xn">Sending...</span><span class="xp" id="xp">0%</span></div><div class="xb"><div class="xf" id="xf"></div></div><div class="xs" id="xs">Starting...</div></div>
+        <div class="uz" onclick="document.getElementById('af').click()">
+          <div class="uzi">📤</div>
+          <div class="uzt">Tap to send files</div>
+          <div class="uzs">Choose any file from your iPhone<br/>to send to your laptop</div>
+        </div>
+        <div class="card" style="margin-top:4px">
+          <div class="ct">Quick Send</div>
+          <div class="fr" onclick="document.getElementById('pf').click()"><div class="fi">🖼️</div><div class="fm"><div class="fn">Photos &amp; Videos</div><div class="fo">Camera roll</div></div><div class="fa">→</div></div>
+          <div class="fr" onclick="document.getElementById('df').click()"><div class="fi">📄</div><div class="fm"><div class="fn">Documents</div><div class="fo">PDF, Word, Excel...</div></div><div class="fa">→</div></div>
+          <div class="fr" onclick="document.getElementById('af').click()"><div class="fi">📁</div><div class="fm"><div class="fn">Any File</div><div class="fo">Browse all files</div></div><div class="fa">→</div></div>
+        </div>
+        <div class="card" id="qc" style="display:none"><div class="ct">Queue</div><div id="ql"></div></div>
+      </div>
+
+      <!-- RECEIVE -->
+      <div class="panel" id="panel-receive">
+        <div class="card"><div class="ct">Files on Desktop</div><div id="dl"><div style="padding:24px;text-align:center;font-size:13px;color:var(--steel3)">Loading...</div></div></div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="panel" id="panel-history">
+        <div class="sg"><div class="sv"><div class="svv" id="hc">0</div><div class="svl">Transfers</div></div><div class="sv"><div class="svv" id="hs">0 B</div><div class="svl">Total Size</div></div></div>
+        <div class="card"><div class="ct">Recent</div><div id="hl"><div style="padding:24px;text-align:center;font-size:13px;color:var(--steel3)">No transfers yet</div></div></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="panel" id="panel-settings">
+        <div class="card">
+          <div class="ct">Connection</div>
+          <div class="row"><span class="rl">Desktop IP</span><span class="rv" id="sip">—</span></div>
+          <div class="row"><span class="rl">Status</span><span class="rv" id="sst" style="color:var(--green)">Connected</span></div>
+          <div class="row"><span class="rl">Encryption</span><span class="rv">HTTPS · TLS</span></div>
+          <div class="row"><span class="rl">Port</span><span class="rv">7443</span></div>
+        </div>
+        <div class="card">
+          <div class="ct">About</div>
+          <div class="row"><span class="rl">App</span><span class="rv">IRONBEAM v1.3</span></div>
+          <div class="row"><span class="rl">Protocol</span><span class="rv">UTP/1.0</span></div>
+          <div class="row"><span class="rl">Copyright</span><span class="rv">© 2025 IRONBEAM Technologies</span></div>
+          <div class="row"><span class="rl">Website</span><span class="rv" style="color:var(--beam2)">ironbeam.ca</span></div>
+        </div>
+        <button class="disc" onclick="disconnect()">Disconnect</button>
+      </div>
+
+    </div>
+  </div>
+  <div class="bb">
+    <button class="bbs" onclick="goRec()">Browse Desktop</button>
+    <button class="bbp" onclick="document.getElementById('af').click()">Send Files</button>
+  </div>
+</div>
+
+<input type="file" id="af" multiple accept="*/*" style="display:none" onchange="gotFiles(this.files)"/>
+<input type="file" id="pf" multiple accept="image/*,video/*" style="display:none" onchange="gotFiles(this.files)"/>
+<input type="file" id="df" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" style="display:none" onchange="gotFiles(this.files)"/>
+<div class="toast" id="toast"></div>
+
+<script>
+const S={ip:'',base:'',ws:null,q:[],busy:false,hist:JSON.parse(localStorage.getItem('ib_h')||'[]')};
+
+document.addEventListener('DOMContentLoaded',()=>{
+  tick();setInterval(tick,15000);
+  document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab==='receive')loadD();
+    if(t.dataset.tab==='history')renderH();
+  }));
+  const saved=localStorage.getItem('ib_ip');
+  if(saved){document.getElementById('ipInput').value=saved;connect();}
+});
+
+function tick(){document.getElementById('sbTime').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+
+async function connect(){
+  const raw=document.getElementById('ipInput').value.trim();
+  const ip=raw.replace(/^https?:\/\//,'').split(':')[0];
+  if(!ip){toast('Enter your laptop IP','err');return;}
+  S.ip=ip;S.base='https://'+ip+':7443';
+  localStorage.setItem('ib_ip',ip);
+  const btn=document.getElementById('connBtn');
+  btn.textContent='...';btn.disabled=true;
+  try{
+    const r=await fetch(S.base+'/ping',{signal:AbortSignal.timeout(6000)});
+    const d=await r.json();
+    if(d.status==='ok'){showApp();openWS();loadD();}
+    else throw 0;
+  }catch{toast('Cannot reach '+ip+':7443\nCheck IP and Wi-Fi','err');}
+  btn.textContent='Connect';btn.disabled=false;
+}
+
+function disconnect(){if(S.ws){S.ws.close();S.ws=null;}S.base='';document.getElementById('sApp').classList.remove('active');document.getElementById('sConnect').classList.add('active');toast('Disconnected');}
+
+function showApp(){
+  document.getElementById('sConnect').classList.remove('active');
+  document.getElementById('sApp').classList.add('active');
+  document.getElementById('sip').textContent=S.ip;
+}
+
+function openWS(){
+  try{
+    S.ws=new WebSocket('wss://'+S.ip+':7443');
+    S.ws.onclose=()=>{if(S.base)setTimeout(openWS,3000);};
+    S.ws.onerror=()=>{};
+  }catch{}
+}
+
+function gotFiles(files){
+  if(!files.length)return;
+  S.q.push(...files);
+  renderQ();
+  if(!S.busy)nextUp();
+  document.querySelectorAll('input[type=file]').forEach(i=>i.value='');
+}
+
+async function nextUp(){
+  if(!S.q.length){S.busy=false;renderQ();return;}
+  S.busy=true;
+  const f=S.q.shift();renderQ();
+  await upload(f);
+  nextUp();
+}
+
+async function upload(file){
+  const xc=document.getElementById('xc'),xn=document.getElementById('xn'),
+        xf=document.getElementById('xf'),xp=document.getElementById('xp'),
+        xs=document.getElementById('xs');
+  xc.classList.add('show');xn.textContent=file.name;
+  xf.style.width='0%';xp.textContent='0%';xs.textContent='Starting...';
+  const t0=Date.now();
+  return new Promise(res=>{
+    const xhr=new XMLHttpRequest(),form=new FormData();
+    form.append('file',file,file.name);
+    xhr.upload.onprogress=e=>{
+      if(!e.lengthComputable)return;
+      const p=Math.round(e.loaded/e.total*100),el=(Date.now()-t0)/1000,sp=el>0?e.loaded/el:0;
+      xf.style.width=p+'%';xp.textContent=p+'%';
+      xs.textContent=fmt(sp)+'/s · '+fmt(e.loaded)+' of '+fmt(e.total);
+    };
+    xhr.onload=()=>{
+      xf.style.width='100%';xp.textContent='100%';
+      xs.textContent='Done in '+((Date.now()-t0)/1000).toFixed(1)+'s';
+      addH('↑',file.name,file.size);
+      toast('Sent: '+file.name,'ok');
+      setTimeout(()=>xc.classList.remove('show'),2000);res();
+    };
+    xhr.onerror=()=>{toast('Failed: '+file.name,'err');xc.classList.remove('show');res();};
+    xhr.open('POST',S.base+'/upload');xhr.send(form);
+  });
+}
+
+async function loadD(){
+  const dl=document.getElementById('dl');
+  dl.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:var(--steel3)">Loading...</div>';
+  try{
+    const r=await fetch(S.base+'/files',{signal:AbortSignal.timeout(5000)});
+    const files=await r.json();
+    if(!files.length){dl.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--steel3)">No files in laptop IronBeam folder</div>';return;}
+    dl.innerHTML=files.map(f=>`<div class="fr" onclick="dlF('${encodeURIComponent(f.name)}','${f.name.replace(/'/g,"\\'")}')"><div class="fi">${em(f.name)}</div><div class="fm"><div class="fn">${esc(f.name)}</div><div class="fo">${fmt(f.size)}</div></div><div class="fa">↓</div></div>`).join('');
+  }catch{dl.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:var(--red)">Could not load — check connection</div>';}
+}
+
+function dlF(enc,name){window.open(S.base+'/files/'+enc,'_blank');addH('↓',name,0);toast('Downloading: '+name);}
+function goRec(){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelector('[data-tab="receive"]').classList.add('active');document.getElementById('panel-receive').classList.add('active');loadD();}
+function renderQ(){const c=document.getElementById('qc'),l=document.getElementById('ql');if(!S.q.length){c.style.display='none';return;}c.style.display='block';l.innerHTML=S.q.map(f=>`<div class="fr"><div class="fi">${em(f.name)}</div><div class="fm"><div class="fn">${esc(f.name)}</div><div class="fo">${fmt(f.size)} · queued</div></div><div class="fa" style="color:var(--steel3);font-size:14px">⏳</div></div>`).join('');}
+
+function addH(d,n,s){S.hist.unshift({d,n,s,t:Date.now()});if(S.hist.length>50)S.hist.pop();localStorage.setItem('ib_h',JSON.stringify(S.hist));renderH();}
+function renderH(){
+  document.getElementById('hc').textContent=S.hist.length;
+  document.getElementById('hs').textContent=fmt(S.hist.reduce((a,h)=>a+(h.s||0),0));
+  const l=document.getElementById('hl');
+  if(!S.hist.length){l.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--steel3)">No transfers yet</div>';return;}
+  l.innerHTML=S.hist.slice(0,30).map(h=>`<div class="fr"><div class="fi">${h.d==='↑'?'📤':'📥'}</div><div class="fm"><div class="fn">${esc(h.n)}</div><div class="fo">${ago(h.t)}</div></div><div style="font-size:11px;color:var(--steel3)">${fmt(h.s)}</div></div>`).join('');
+}
+
+let _tt;
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className='toast show'+(type?' '+type:'');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),3200);}
+function fmt(b){if(!b||b<0)return'–';if(b<1024)return Math.round(b)+' B';if(b<1048576)return Math.round(b/1024)+' KB';if(b<1073741824)return(b/1048576).toFixed(1)+' MB';return(b/1073741824).toFixed(2)+' GB';}
+function em(n){const e=(n.split('.').pop()||'').toLowerCase();return{jpg:'🖼️',jpeg:'🖼️',png:'🖼️',heic:'🖼️',gif:'🎞️',mp4:'🎬',mov:'🎬',mp3:'🎵',wav:'🎵',pdf:'📄',doc:'📋',docx:'📋',xls:'📊',xlsx:'📊',txt:'📝',zip:'🗜️',rar:'🗜️'}[e]||'📁';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function ago(ts){const s=Math.round((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return Math.round(s/60)+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago';}
+</script>
+</body>
+</html>
