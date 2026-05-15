@@ -5,6 +5,9 @@ contextBridge.exposeInMainWorld('IB', {
   getStatus:  () => ipcRenderer.invoke('get-status'),
   listFiles:  () => ipcRenderer.invoke('list-files'),
 
+  // ── QR generation (handled by main process) ───────────
+  generateQR: (url) => ipcRenderer.invoke('generate-qr', url),
+
   // ── File operations ───────────────────────────────────
   openFile:   (name) => ipcRenderer.invoke('open-file', name),
   openFolder: ()     => ipcRenderer.invoke('open-folder'),

@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 
 <title>IRONBEAM</title>
-<!-- QR code generation (browser-compatible, no require() needed) -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -405,17 +403,12 @@ function ago(ts) { const s=Math.round((Date.now()-ts)/1000);if(s<60)return'just 
 
 async function generateQR(url) {
   try {
-    // Uses QRCode global from qrcode CDN (browser build — no require() needed)
-    const dataUrl = await QRCode.toDataURL(url, {
-      width: 240, margin: 1,
-      color: { dark: '#000000', light: '#ffffff' }
-    });
+    // IB.generateQR runs in main process via IPC — no CDN, no require() in renderer
+    const dataUrl = await IB.generateQR(url);
     document.getElementById('qrCode').src = dataUrl;
   } catch(e) {
     console.warn('QR generation failed:', e.message);
-    // Fallback: hide image, show URL hint
-    const img = document.getElementById('qrCode');
-    img.style.display = 'none';
+    document.getElementById('qrCode').style.display = 'none';
   }
 }
 </script>
