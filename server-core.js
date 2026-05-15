@@ -8,21 +8,25 @@ const { WebSocketServer } = require('ws');
 const multer   = require('multer');
 const forge    = require('node-forge');
 const https    = require('https');
+const http     = require('http');
 const path     = require('path');
 const fs       = require('fs');
 const os       = require('os');
 const crypto   = require('crypto');
 
-const PORT         = 7443;
-const TRANSFER_DIR = path.join(os.homedir(), 'IronBeam');
-const CERT_DIR     = path.join(TRANSFER_DIR, '.certs');
-const CERT_FILE    = path.join(CERT_DIR, 'ironbeam-cert.pem');
-const KEY_FILE     = path.join(CERT_DIR, 'ironbeam-key.pem');
-const PROFILE_FILE = path.join(TRANSFER_DIR, 'IRONBEAM-Trust.mobileconfig');
+const PORT          = 7443;
+const DISCOVER_PORT = 7444;   // plain-HTTP discovery, no cert needed
+const TRANSFER_DIR  = path.join(os.homedir(), 'IronBeam');
+const CERT_DIR      = path.join(TRANSFER_DIR, '.certs');
+const CERT_FILE     = path.join(CERT_DIR, 'ironbeam-cert.pem');
+const KEY_FILE      = path.join(CERT_DIR, 'ironbeam-key.pem');
+const PROFILE_FILE  = path.join(TRANSFER_DIR, 'IRONBEAM-Trust.mobileconfig');
 
-let _server = null;
-let _wss    = null;
-let _phoneConnected = false;
+let _server          = null;
+let _discoveryServer = null;
+let _mdns            = null;
+let _wss             = null;
+let _phoneConnected  = false;
 
 const _fileReceivedCbs   = [];
 const _phoneConnectedCbs = [];
@@ -171,18 +175,70 @@ async function start() {
   return new Promise((resolve, reject) => {
     _server.listen(PORT, '0.0.0.0', () => {
       console.log(`[IRONBEAM] Server ready on https://${ip}:${PORT}`);
+      startDiscovery(ip);
       resolve();
     });
     _server.on('error', e => {
       if (e.code === 'EADDRINUSE') {
         console.log('[IRONBEAM] Port already in use — server may already be running');
-        resolve(); // Don't crash the app
+        resolve();
       } else reject(e);
     });
   });
 }
 
-function stop() { _server?.close(); }
+// ── Local network auto-discovery (no SSL, no accounts) ────────────────────────
+function startDiscovery(ip) {
+  // 1. Tiny HTTP server on port 7444 — just announces who we are
+  const discApp = express();
+  discApp.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  });
+  discApp.get('/discover', (req, res) => {
+    res.json({ ip, port: PORT, name: os.hostname(), platform: process.platform, ok: true });
+  });
+  _discoveryServer = http.createServer(discApp);
+  _discoveryServer.listen(DISCOVER_PORT, '0.0.0.0', () => {
+    console.log(`[IRONBEAM] Discovery beacon on http://${ip}:${DISCOVER_PORT}`);
+  });
+  _discoveryServer.on('error', () => {}); // ignore if port busy
+
+  // 2. mDNS broadcast — makes ironbeam.local resolve to this PC on local Wi-Fi
+  try {
+    const mdns = require('multicast-dns')();
+    _mdns = mdns;
+    mdns.on('query', query => {
+      const wantsUs = query.questions.some(q =>
+        q.name === 'ironbeam.local' ||
+        q.name === '_ironbeam._tcp.local' ||
+        q.name === '_ironbeam._tcp.local.'
+      );
+      if (!wantsUs) return;
+      mdns.respond({
+        answers: [
+          { name: 'ironbeam.local', type: 'A', ttl: 300, data: ip },
+          { name: '_ironbeam._tcp.local', type: 'PTR', ttl: 300, data: 'IRONBEAM._ironbeam._tcp.local' },
+          { name: 'IRONBEAM._ironbeam._tcp.local', type: 'SRV', ttl: 300, data: { priority: 0, weight: 0, port: DISCOVER_PORT, target: 'ironbeam.local' } },
+          { name: 'IRONBEAM._ironbeam._tcp.local', type: 'TXT', ttl: 300, data: [`ip=${ip}`, `port=${PORT}`] },
+        ]
+      });
+    });
+    // Proactively announce on startup so nearby devices see us immediately
+    mdns.respond({
+      answers: [{ name: 'ironbeam.local', type: 'A', ttl: 300, data: ip }]
+    });
+    console.log('[IRONBEAM] mDNS broadcasting as ironbeam.local →', ip);
+  } catch (e) {
+    console.log('[IRONBEAM] mDNS unavailable (will use saved-IP fallback):', e.message);
+  }
+}
+
+function stop() {
+  _server?.close();
+  _discoveryServer?.close();
+  try { _mdns?.destroy(); } catch {}
+}
 function isConnected() { return _phoneConnected; }
 function onFileReceived(cb)    { _fileReceivedCbs.push(cb); }
 function onPhoneConnected(cb)  { _phoneConnectedCbs.push(cb); }
