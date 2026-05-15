@@ -190,10 +190,18 @@ html,body{height:100%;background:var(--bg);color:var(--steel);font-family:-apple
         <div class="dash-sub">Unrestricted Transfer Protocol · © 2025 IRONBEAM Technologies</div>
       </div>
       <div class="stat-row">
-        <div class="stat-card"><div class="stat-val" id="statFiles">0</div><div class="stat-lbl">Files Transferred</div></div>
-        <div class="stat-card"><div class="stat-val" id="statSize">0 B</div><div class="stat-lbl">Total Size</div></div>
-        <div class="stat-card"><div class="stat-val" id="statStatus" style="color:var(--steel3)">─</div><div class="stat-lbl">iPhone Status</div></div>
-        <div class="stat-card"><div class="stat-val" id="statIp" style="font-size:15px">─</div><div class="stat-lbl">Local IP</div></div>
+        <div class="stat-card" onclick="showPanel('files',document.querySelector('[data-panel=files]'))" style="cursor:pointer" title="View all files">
+          <div class="stat-val" id="statFiles">0</div><div class="stat-lbl">Files Transferred</div>
+        </div>
+        <div class="stat-card" onclick="IB.openFolder()" style="cursor:pointer" title="Open transfer folder">
+          <div class="stat-val" id="statSize">0 B</div><div class="stat-lbl">Total Size</div>
+        </div>
+        <div class="stat-card" style="cursor:default">
+          <div class="stat-val" id="statStatus" style="color:var(--steel3)">─</div><div class="stat-lbl">iPhone Status</div>
+        </div>
+        <div class="stat-card" onclick="showPanel('settings',document.querySelector('[data-panel=settings]'))" style="cursor:pointer" title="View settings">
+          <div class="stat-val" id="statIp" style="font-size:15px">─</div><div class="stat-lbl">Local IP</div>
+        </div>
       </div>
       <div class="connect-card" id="connectCard">
         <div class="cc-qr">
@@ -249,10 +257,10 @@ html,body{height:100%;background:var(--bg);color:var(--steel);font-family:-apple
     <div class="panel" id="panel-log">
       <div class="dash-header">
         <div class="dash-title">Transfer Log</div>
-        <div class="dash-sub">All files sent and received this session</div>
+        <div class="dash-sub">All files in your IronBeam folder · click any file to open it</div>
       </div>
       <div class="log-area">
-        <div id="logList"><div style="padding:32px;text-align:center;color:var(--steel3);font-size:14px">No transfers yet this session</div></div>
+        <div id="logList"><div style="padding:32px;text-align:center;color:var(--steel3);font-size:14px">Loading...</div></div>
       </div>
     </div>
 
@@ -309,6 +317,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (status.connected) setConnected(true, 'iPhone');
   await loadFiles();
+  renderLogFromFiles(S.files);
 
   IB.onPhoneConnected(d => { setConnected(true, d.ip); });
   IB.onPhoneDisconnected(() => setConnected(false));
@@ -349,11 +358,30 @@ function renderFileGrid(id, files) {
     return;
   }
   grid.innerHTML = files.map(f => `
-    <div class="file-card" ondblclick="IB.openFile('${esc(f.name)}')">
+    <div class="file-card" onclick="IB.openFile('${esc(f.name)}')" style="cursor:pointer">
       <button class="fc-del" onclick="delFile('${esc(f.name)}',event)" title="Delete">✕</button>
       <div class="fc-icon">${em(f.name)}</div>
       <div class="fc-name">${esc(f.name)}</div>
       <div class="fc-size">${fmt(f.size)}</div>
+    </div>`).join('');
+}
+
+function renderLogFromFiles(files) {
+  const list = document.getElementById('logList');
+  // Merge session events (most recent) with disk files as history
+  const diskItems = files.map(f => ({ dir:'↓ received', name:f.name, size:f.size, t:f.modified }));
+  const allItems = [...S.log, ...diskItems.filter(d => !S.log.find(l => l.name===d.name))];
+  allItems.sort((a,b) => b.t - a.t);
+  if (!allItems.length) {
+    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--steel3);font-size:14px">No files in transfer folder yet</div>';
+    return;
+  }
+  list.innerHTML = allItems.map(l => `
+    <div class="log-item" onclick="IB.openFile('${esc(l.name)}')" style="cursor:pointer" title="Click to open">
+      <div class="log-dir">${l.dir && l.dir.includes('received') ? '📥' : '📥'}</div>
+      <div class="log-name">${esc(l.name)}</div>
+      <div class="log-size" style="font-size:10px;color:var(--steel3);font-family:monospace;white-space:nowrap">${fmt(l.size)}</div>
+      <div class="log-time">${ago(l.t)}</div>
     </div>`).join('');
 }
 
@@ -378,8 +406,9 @@ function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   if (id === 'files') loadFiles();
+  if (id === 'log') loadFiles().then(() => renderLogFromFiles(S.files));
 }
 
 function showMobileconfigInfo() {
