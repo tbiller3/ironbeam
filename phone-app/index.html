@@ -144,7 +144,7 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
         inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <button class="cb" id="connBtn" onclick="connect()">Connect</button>
     </div>
-    <div class="ch">Same Wi-Fi network required · Port 7443</div>
+    <div class="ch">Same Wi-Fi network required · Port 7878</div>
     <div class="steps">
       <div class="sr"><div class="sn">1</div><div class="st">IRONBEAM server must be running on your HP laptop</div></div>
       <div class="sr"><div class="sn">2</div><div class="st">iPhone and laptop on the <strong style="color:var(--beam2)">same Wi-Fi</strong></div></div>
@@ -250,11 +250,24 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 function tick(){document.getElementById('sbTime').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
 
+// Auto-detect protocol based on how this page was loaded
+// HTTP load (port 7878) → use ws:// and http://
+// HTTPS load (port 7443) → use wss:// and https://
+function getProto(){
+  const isHttps=location.protocol==='https:';
+  return {
+    http: isHttps?'https':'http',
+    ws:   isHttps?'wss':'ws',
+    port: isHttps?'7443':'7878',
+  };
+}
+
 async function connect(){
   const raw=document.getElementById('ipInput').value.trim();
   const ip=raw.replace(/^https?:\/\//,'').split(':')[0];
   if(!ip){toast('Enter your laptop IP','err');return;}
-  S.ip=ip;S.base='https://'+ip+':7443';
+  const p=getProto();
+  S.ip=ip;S.base=p.http+'://'+ip+':'+p.port;
   localStorage.setItem('ib_ip',ip);
   const btn=document.getElementById('connBtn');
   btn.textContent='...';btn.disabled=true;
@@ -263,7 +276,7 @@ async function connect(){
     const d=await r.json();
     if(d.status==='ok'){showApp();openWS();loadD();}
     else throw 0;
-  }catch{toast('Cannot reach '+ip+':7443\nCheck IP and Wi-Fi','err');}
+  }catch{toast('Cannot reach '+ip+':'+p.port+'\nCheck IP and Wi-Fi','err');}
   btn.textContent='Connect';btn.disabled=false;
 }
 
@@ -277,7 +290,8 @@ function showApp(){
 
 function openWS(){
   try{
-    S.ws=new WebSocket('wss://'+S.ip+':7443');
+    const p=getProto();
+    S.ws=new WebSocket(p.ws+'://'+S.ip+':'+p.port);
     S.ws.onclose=()=>{if(S.base)setTimeout(openWS,3000);};
     S.ws.onerror=()=>{};
   }catch{}

@@ -635,12 +635,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 // ── Server ready ──────────────────────────────────────────────────────────────
 function onServerReady(info) {
   state.serverInfo = info;
-  const url = `https://${info.ip}:${info.portHttps}/phone`;
+  // Use HTTP (port 7878) as primary — no certificate install needed on iPhone
+  const httpUrl  = `http://${info.ip}:${info.portHttp || 7878}/phone`;
+  const httpsUrl = `https://${info.ip}:${info.portHttps || 7443}/phone`;
+  const url = httpUrl;
 
   document.getElementById('tbDot').className = 'tb-dot on pulse';
   document.getElementById('tbStatus').textContent = `Ready · ${info.ip}`;
   document.getElementById('connectUrl').textContent = url;
-  document.getElementById('deviceIp').textContent = `${info.ip}:${info.portHttps}`;
+  document.getElementById('deviceIp').textContent = `${info.ip}:${info.portHttp || 7878}`;
   document.getElementById('setIp').textContent = info.ip;
   document.getElementById('setUrl').textContent = url;
   document.getElementById('setDir').textContent = info.transferDir;

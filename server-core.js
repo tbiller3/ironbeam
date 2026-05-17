@@ -8,12 +8,14 @@ const { WebSocketServer } = require('ws');
 const multer   = require('multer');
 const forge    = require('node-forge');
 const https    = require('https');
+const http     = require('http');
 const path     = require('path');
 const fs       = require('fs');
 const os       = require('os');
 const crypto   = require('crypto');
 
-const PORT         = 7443;
+const PORT      = 7443;
+const PORT_HTTP = 7878;
 const TRANSFER_DIR = path.join(os.homedir(), 'IronBeam');
 const CERT_DIR     = path.join(TRANSFER_DIR, '.certs');
 const CERT_FILE    = path.join(CERT_DIR, 'ironbeam-cert.pem');
@@ -149,11 +151,11 @@ async function start() {
     try { fs.unlinkSync(fp); res.json({ ok:true }); } catch { res.status(404).json({ error:'Not found' }); }
   });
 
-  const sslOpts = { key: fs.readFileSync(KEY_FILE), cert: fs.readFileSync(CERT_FILE) };
-  _server = https.createServer(sslOpts, expressApp);
-  _wss    = new WebSocketServer({ noServer:true });
-
-  _server.on('upgrade', (req,sock,head) => _wss.handleUpgrade(req,sock,head, ws => _wss.emit('connection', ws, req)));
+  // WebSocket handler (shared by both HTTP and HTTPS servers)
+  _wss = new WebSocketServer({ noServer:true });
+  function handleUpgrade(req, sock, head) {
+    _wss.handleUpgrade(req, sock, head, ws => _wss.emit('connection', ws, req));
+  }
   _wss.on('connection', (ws, req) => {
     const clientIp = req.socket.remoteAddress;
     console.log('[IRONBEAM] Phone connected from', clientIp);
@@ -168,15 +170,34 @@ async function start() {
     ws.on('error', () => {});
   });
 
+  // HTTPS server on 7443 (kept for compatibility)
+  const sslOpts = { key: fs.readFileSync(KEY_FILE), cert: fs.readFileSync(CERT_FILE) };
+  _server = https.createServer(sslOpts, expressApp);
+  _server.on('upgrade', handleUpgrade);
+
+  // HTTP server on 7878 — no certificate needed, works on all iOS versions
+  const _httpServer = http.createServer(expressApp);
+  _httpServer.on('upgrade', handleUpgrade);
+
   return new Promise((resolve, reject) => {
+    // Start HTTP server first (primary for iPhone connection)
+    _httpServer.listen(PORT_HTTP, '0.0.0.0', () => {
+      console.log(`[IRONBEAM] HTTP server ready on http://${ip}:${PORT_HTTP}`);
+    });
+    _httpServer.on('error', e => {
+      if (e.code === 'EADDRINUSE') console.log('[IRONBEAM] HTTP port already in use');
+      else console.error('[IRONBEAM] HTTP server error:', e.message);
+    });
+
+    // Start HTTPS server
     _server.listen(PORT, '0.0.0.0', () => {
-      console.log(`[IRONBEAM] Server ready on https://${ip}:${PORT}`);
+      console.log(`[IRONBEAM] HTTPS server ready on https://${ip}:${PORT}`);
       resolve();
     });
     _server.on('error', e => {
       if (e.code === 'EADDRINUSE') {
-        console.log('[IRONBEAM] Port already in use — server may already be running');
-        resolve(); // Don't crash the app
+        console.log('[IRONBEAM] HTTPS port already in use — server may already be running');
+        resolve();
       } else reject(e);
     });
   });
