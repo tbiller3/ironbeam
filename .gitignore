@@ -5,3 +5,8 @@ dist/
 *.mobileconfig
 .DS_Store
 Thumbs.db
+
+# Stray artifacts — never commit these
+files/
+files.zip
+main.js
