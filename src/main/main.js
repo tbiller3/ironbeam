@@ -38,6 +38,11 @@ app.whenReady().then(async () => {
   createTray();
   createWindow();
 
+  // Notify renderer that server is ready (it may have loaded before start() resolved)
+  setTimeout(() => {
+    mainWindow?.webContents.send('server-ready', getInfoPayload());
+  }, 500);
+
   const firstRun = !fs.existsSync(path.join(os.homedir(), '.ironbeam-v1'));
   if (firstRun) {
     fs.writeFileSync(path.join(os.homedir(), '.ironbeam-v1'), '1');
@@ -120,8 +125,19 @@ function updateTrayMenu(connected) {
   tray?.setToolTip(connected ? 'IRONBEAM — iPhone Connected ✓' : `IRONBEAM — https://${ip}:7443/phone`);
 }
 
-// IPC
-ipcMain.handle('get-status', () => ({ ip: getIp(), port: 7443, transferDir: TRANSFER_DIR, connected: serverCore?.isConnected() || false, version: app.getVersion() }));
+// IPC — channel names must match preload.js exactly
+function getInfoPayload() {
+  return {
+    ip: getIp(),
+    portHttps: 7443,
+    portHttp: 7878,
+    transferDir: TRANSFER_DIR,
+    connectedDevices: serverCore?.isConnected() ? 1 : 0,
+    version: app.getVersion(),
+  };
+}
+ipcMain.handle('get-info',    () => getInfoPayload());
+ipcMain.handle('get-status',  () => getInfoPayload()); // legacy alias
 ipcMain.handle('list-files', () => {
   try {
     return fs.readdirSync(TRANSFER_DIR).filter(f => !f.startsWith('.') && !f.endsWith('.mobileconfig'))
@@ -129,14 +145,19 @@ ipcMain.handle('list-files', () => {
       .sort((a,b) => b.modified - a.modified);
   } catch { return []; }
 });
-ipcMain.handle('open-file', (_, n) => shell.openPath(path.join(TRANSFER_DIR, n)));
-ipcMain.handle('open-folder', () => shell.openPath(TRANSFER_DIR));
+ipcMain.handle('open-file',           (_, n) => shell.openPath(path.join(TRANSFER_DIR, n)));
+ipcMain.handle('open-transfer-folder',()     => shell.openPath(TRANSFER_DIR));
+ipcMain.handle('open-folder',         ()     => shell.openPath(TRANSFER_DIR)); // legacy alias
 ipcMain.handle('delete-file', (_, n) => { try { fs.unlinkSync(path.join(TRANSFER_DIR, n)); return true; } catch { return false; } });
 ipcMain.handle('get-mobileconfig', () => {
   const p = path.join(TRANSFER_DIR, 'IRONBEAM-Trust.mobileconfig');
   return fs.existsSync(p) ? p : null;
 });
-ipcMain.on('win-min',   () => mainWindow?.minimize());
+ipcMain.on('window-minimize', () => mainWindow?.minimize());
+ipcMain.on('window-maximize', () => mainWindow?.isMaximized() ? mainWindow.unmaximize() : mainWindow?.maximize());
+ipcMain.on('window-hide',     () => mainWindow?.hide());
+ipcMain.on('window-quit',     () => { isQuitting = true; app.quit(); });
+ipcMain.on('win-min',   () => mainWindow?.minimize());   // legacy aliases
 ipcMain.on('win-max',   () => mainWindow?.isMaximized() ? mainWindow.unmaximize() : mainWindow?.maximize());
 ipcMain.on('win-close', () => mainWindow?.hide());
 
