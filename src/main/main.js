@@ -67,8 +67,8 @@ function createWindow() {
   });
 
   const rendererPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'src', 'renderer', 'index.html')
-    : path.join(__dirname, '../renderer/index.html');
+    ? path.join(process.resourcesPath, 'src', 'renderer', 'app', 'index.html')
+    : path.join(__dirname, '../renderer/app/index.html');
   mainWindow.loadFile(rendererPath);
 
   mainWindow.once('ready-to-show', () => {
