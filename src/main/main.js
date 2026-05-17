@@ -89,12 +89,12 @@ function createWindow() {
       updateTrayMenu(serverCore.isConnected());
     });
     serverCore.onPhoneConnected(ip => {
-      mainWindow?.webContents.send('phone-connected', { ip });
+      mainWindow?.webContents.send('device-connected', { ip, count: 1 });
       updateTrayMenu(true);
       notify('iPhone connected', 'Ready to transfer files');
     });
     serverCore.onPhoneDisconnected(() => {
-      mainWindow?.webContents.send('phone-disconnected');
+      mainWindow?.webContents.send('device-disconnected', { count: 0 });
       updateTrayMenu(false);
     });
   }
