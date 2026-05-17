@@ -1,25 +1,14 @@
 const { contextBridge, ipcRenderer } = require('electron');
-
 contextBridge.exposeInMainWorld('IB', {
-  // ── Data ──────────────────────────────────────────────
-  getStatus:  () => ipcRenderer.invoke('get-status'),
-  listFiles:  () => ipcRenderer.invoke('list-files'),
-
-  // ── QR generation (handled by main process) ───────────
-  generateQR: (url) => ipcRenderer.invoke('generate-qr', url),
-
-  // ── File operations ───────────────────────────────────
-  openFile:   (name) => ipcRenderer.invoke('open-file', name),
-  openFolder: ()     => ipcRenderer.invoke('open-folder'),
-  deleteFile: (name) => ipcRenderer.invoke('delete-file', name),
-
-  // ── Window controls ───────────────────────────────────
-  winMin:   () => ipcRenderer.send('win-min'),
-  winMax:   () => ipcRenderer.send('win-max'),
-  winClose: () => ipcRenderer.send('win-close'),
-
-  // ── Event listeners ───────────────────────────────────
-  onPhoneConnected:    (cb) => ipcRenderer.on('phone-connected',    (_, d) => cb(d)),
-  onPhoneDisconnected: (cb) => ipcRenderer.on('phone-disconnected', (_, d) => cb(d)),
-  onFileReceived:      (cb) => ipcRenderer.on('file-received',      (_, d) => cb(d)),
+  getInfo:            ()     => ipcRenderer.invoke('get-info'),
+  listFiles:          ()     => ipcRenderer.invoke('list-files'),
+  openTransferFolder: ()     => ipcRenderer.invoke('open-transfer-folder'),
+  openFile:           (name) => ipcRenderer.invoke('open-file', name),
+  deleteFile:         (name) => ipcRenderer.invoke('delete-file', name),
+  minimize: () => ipcRenderer.send('window-minimize'),
+  maximize: () => ipcRenderer.send('window-maximize'),
+  hide:     () => ipcRenderer.send('window-hide'),
+  quit:     () => ipcRenderer.send('window-quit'),
+  on:  (ch, cb) => { const ok=['server-ready','file-received','device-connected','device-disconnected','fs-change']; if(ok.includes(ch)) ipcRenderer.on(ch, (_,d)=>cb(d)); },
+  off: (ch) => ipcRenderer.removeAllListeners(ch),
 });

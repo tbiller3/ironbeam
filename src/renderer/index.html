@@ -62,10 +62,8 @@ html,body{height:100%;background:var(--bg);color:var(--steel);font-family:-apple
 .stat-lbl{font-size:10px;color:var(--steel3);letter-spacing:.1em;text-transform:uppercase}
 
 /* Connect card */
-.connect-card{margin:0 28px 20px;background:var(--bg2);border:1px solid var(--b1);border-radius:12px;padding:20px;display:flex;align-items:flex-start;gap:20px}
-.cc-qr{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px}
-.cc-qr img{width:120px;height:120px;border-radius:8px;background:#fff;padding:6px;display:block}
-.cc-qr-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--steel3);font-weight:700}
+.connect-card{margin:0 28px 20px;background:var(--bg2);border:1px solid var(--b1);border-radius:12px;padding:20px;display:flex;align-items:center;gap:20px}
+.cc-icon{width:52px;height:52px;border-radius:12px;background:var(--beam3);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cc-text{flex:1}
 .cc-title{font-size:15px;font-weight:700;color:var(--steel);margin-bottom:4px}
 .cc-url{font-family:'Consolas','Courier New',monospace;font-size:13px;color:var(--beam2);background:var(--bg3);border:1px solid var(--b2);border-radius:6px;padding:6px 12px;display:inline-block;margin-bottom:6px}
@@ -190,32 +188,23 @@ html,body{height:100%;background:var(--bg);color:var(--steel);font-family:-apple
         <div class="dash-sub">Unrestricted Transfer Protocol · © 2025 IRONBEAM Technologies</div>
       </div>
       <div class="stat-row">
-        <div class="stat-card" onclick="showPanel('files',document.querySelector('[data-panel=files]'))" style="cursor:pointer" title="View all files">
-          <div class="stat-val" id="statFiles">0</div><div class="stat-lbl">Files Transferred</div>
-        </div>
-        <div class="stat-card" onclick="IB.openFolder()" style="cursor:pointer" title="Open transfer folder">
-          <div class="stat-val" id="statSize">0 B</div><div class="stat-lbl">Total Size</div>
-        </div>
-        <div class="stat-card" style="cursor:default">
-          <div class="stat-val" id="statStatus" style="color:var(--steel3)">─</div><div class="stat-lbl">iPhone Status</div>
-        </div>
-        <div class="stat-card" onclick="showPanel('settings',document.querySelector('[data-panel=settings]'))" style="cursor:pointer" title="View settings">
-          <div class="stat-val" id="statIp" style="font-size:15px">─</div><div class="stat-lbl">Local IP</div>
-        </div>
+        <div class="stat-card"><div class="stat-val" id="statFiles">0</div><div class="stat-lbl">Files Transferred</div></div>
+        <div class="stat-card"><div class="stat-val" id="statSize">0 B</div><div class="stat-lbl">Total Size</div></div>
+        <div class="stat-card"><div class="stat-val" id="statStatus" style="color:var(--steel3)">─</div><div class="stat-lbl">iPhone Status</div></div>
+        <div class="stat-card"><div class="stat-val" id="statIp" style="font-size:15px">─</div><div class="stat-lbl">Local IP</div></div>
       </div>
       <div class="connect-card" id="connectCard">
-        <div class="cc-qr">
-          <img id="qrCode" src="" alt="QR Code"/>
-          <span class="cc-qr-label">Scan to Connect</span>
+        <div class="cc-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" stroke="#e8a020" stroke-width="1.8"/><line x1="12" y1="18" x2="12" y2="18.01" stroke="#e8a020" stroke-width="2.5" stroke-linecap="round"/></svg>
         </div>
         <div class="cc-text">
           <div class="cc-title">Connect your iPhone</div>
           <div class="cc-url" id="phoneUrl">https://─:7443/phone</div>
-          <div class="cc-note">Both devices must be on the same Wi-Fi network</div>
+          <div class="cc-note">Open this address in Safari on your iPhone · Both devices must be on the same Wi-Fi</div>
           <div class="cc-steps">
-            <div class="cc-step"><div class="step-n">1</div>Open IRONBEAM on your iPhone</div>
-            <div class="cc-step"><div class="step-n">2</div>Tap "Scan to Connect" and point at QR code</div>
-            <div class="cc-step"><div class="step-n">3</div>Transfer files instantly</div>
+            <div class="cc-step"><div class="step-n">1</div>Open URL in iPhone Safari</div>
+            <div class="cc-step"><div class="step-n">2</div>Enter IP address and tap Connect</div>
+            <div class="cc-step"><div class="step-n">3</div>Drag &amp; drop files in the app</div>
           </div>
         </div>
       </div>
@@ -257,10 +246,10 @@ html,body{height:100%;background:var(--bg);color:var(--steel);font-family:-apple
     <div class="panel" id="panel-log">
       <div class="dash-header">
         <div class="dash-title">Transfer Log</div>
-        <div class="dash-sub">All files in your IronBeam folder · click any file to open it</div>
+        <div class="dash-sub">All files sent and received this session</div>
       </div>
       <div class="log-area">
-        <div id="logList"><div style="padding:32px;text-align:center;color:var(--steel3);font-size:14px">Loading...</div></div>
+        <div id="logList"><div style="padding:32px;text-align:center;color:var(--steel3);font-size:14px">No transfers yet this session</div></div>
       </div>
     </div>
 
@@ -304,7 +293,6 @@ const S = { ip:'', transferDir:'', files:[], log:[], fileCount:0, totalBytes:0 }
 document.addEventListener('DOMContentLoaded', async () => {
   const status = await IB.getStatus();
   S.ip = status.ip;
-  generateQR(`https://${S.ip}:7443`);
   S.transferDir = status.transferDir;
 
   document.getElementById('phoneUrl').textContent  = `https://${S.ip}:7443/phone`;
@@ -317,7 +305,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (status.connected) setConnected(true, 'iPhone');
   await loadFiles();
-  renderLogFromFiles(S.files);
 
   IB.onPhoneConnected(d => { setConnected(true, d.ip); });
   IB.onPhoneDisconnected(() => setConnected(false));
@@ -358,30 +345,11 @@ function renderFileGrid(id, files) {
     return;
   }
   grid.innerHTML = files.map(f => `
-    <div class="file-card" onclick="IB.openFile('${esc(f.name)}')" style="cursor:pointer">
+    <div class="file-card" ondblclick="IB.openFile('${esc(f.name)}')">
       <button class="fc-del" onclick="delFile('${esc(f.name)}',event)" title="Delete">✕</button>
       <div class="fc-icon">${em(f.name)}</div>
       <div class="fc-name">${esc(f.name)}</div>
       <div class="fc-size">${fmt(f.size)}</div>
-    </div>`).join('');
-}
-
-function renderLogFromFiles(files) {
-  const list = document.getElementById('logList');
-  // Merge session events (most recent) with disk files as history
-  const diskItems = files.map(f => ({ dir:'↓ received', name:f.name, size:f.size, t:f.modified }));
-  const allItems = [...S.log, ...diskItems.filter(d => !S.log.find(l => l.name===d.name))];
-  allItems.sort((a,b) => b.t - a.t);
-  if (!allItems.length) {
-    list.innerHTML = '<div style="padding:32px;text-align:center;color:var(--steel3);font-size:14px">No files in transfer folder yet</div>';
-    return;
-  }
-  list.innerHTML = allItems.map(l => `
-    <div class="log-item" onclick="IB.openFile('${esc(l.name)}')" style="cursor:pointer" title="Click to open">
-      <div class="log-dir">${l.dir && l.dir.includes('received') ? '📥' : '📥'}</div>
-      <div class="log-name">${esc(l.name)}</div>
-      <div class="log-size" style="font-size:10px;color:var(--steel3);font-family:monospace;white-space:nowrap">${fmt(l.size)}</div>
-      <div class="log-time">${ago(l.t)}</div>
     </div>`).join('');
 }
 
@@ -406,9 +374,8 @@ function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
-  if (btn) btn.classList.add('active');
+  btn.classList.add('active');
   if (id === 'files') loadFiles();
-  if (id === 'log') loadFiles().then(() => renderLogFromFiles(S.files));
 }
 
 function showMobileconfigInfo() {
@@ -429,17 +396,6 @@ function fmt(b) { if(!b||b<0)return'─';if(b<1024)return Math.round(b)+' B';if(
 function em(n) { const e=(n.split('.').pop()||'').toLowerCase(); return{jpg:'🖼️',jpeg:'🖼️',png:'🖼️',heic:'🖼️',gif:'🎞️',mp4:'🎬',mov:'🎬',mp3:'🎵',wav:'🎵',pdf:'📄',doc:'📋',docx:'📋',xls:'📊',xlsx:'📊',txt:'📝',zip:'🗜️',rar:'🗜️'}[e]||'📁'; }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function ago(ts) { const s=Math.round((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return Math.round(s/60)+'m ago';return Math.round(s/3600)+'h ago'; }
-
-async function generateQR(url) {
-  try {
-    // IB.generateQR runs in main process via IPC — no CDN, no require() in renderer
-    const dataUrl = await IB.generateQR(url);
-    document.getElementById('qrCode').src = dataUrl;
-  } catch(e) {
-    console.warn('QR generation failed:', e.message);
-    document.getElementById('qrCode').style.display = 'none';
-  }
-}
 </script>
 </body>
 </html>

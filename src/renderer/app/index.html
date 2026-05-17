@@ -107,118 +107,22 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 .empty-state svg{width:32px;height:32px;opacity:.3}
 .empty-state p{font-size:12px}
 
-/* Transfer middle column — wormhole */
-.transfer-layout{grid-template-columns:1fr 180px 1fr !important}
+/* Transfer middle column */
 .xfer-middle{
   border-left:1px solid var(--b2);border-right:1px solid var(--b2);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  background:var(--bg);padding:10px 6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:var(--bg);padding:8px;
 }
-.xfer-stats{display:flex;flex-direction:column;align-items:center;gap:1px}
-.xs-val{font-size:13px;font-weight:600;color:var(--beam2);font-variant-numeric:tabular-nums}
+.xfer-btn{
+  width:44px;height:44px;border-radius:50%;
+  background:var(--bg3);border:1px solid var(--b2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;transition:all .2s;color:var(--steel3);
+}
+.xfer-btn:hover{background:var(--beam3);border-color:var(--b1);color:var(--beam2);transform:scale(1.08)}
+.xfer-stats{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:8px}
+.xs-val{font-size:15px;font-weight:600;color:var(--beam2);font-variant-numeric:tabular-nums}
 .xs-lbl{font-size:9px;color:var(--steel3);letter-spacing:.1em;text-transform:uppercase}
-
-/* ── IRONBEAM Wormhole (desktop) ── */
-.wh-stage{position:relative;width:148px;height:148px;display:grid;place-items:center}
-.wh-stage > *{position:absolute;inset:0;width:100%;height:100%}
-.wh-halo{background:radial-gradient(circle at 50% 50%,rgba(255,184,0,.18) 0%,rgba(255,136,0,.10) 22%,rgba(120,60,0,.05) 45%,transparent 65%);filter:blur(6px);animation:wh-halo 4s ease-in-out infinite;pointer-events:none}
-@keyframes wh-halo{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
-.wh-particles{-webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,#000 62%,rgba(0,0,0,.75) 78%,rgba(0,0,0,.35) 90%,transparent 100%);mask:radial-gradient(circle at 50% 50%,#000 0%,#000 62%,rgba(0,0,0,.75) 78%,rgba(0,0,0,.35) 90%,transparent 100%)}
-.wh-rings{overflow:visible}
-.wh-ring{transform-origin:300px 300px;transform-box:fill-box}
-.wh-r1{animation:wh-spin  60s linear infinite}
-.wh-r2{animation:wh-rspin 45s linear infinite}
-.wh-r3{animation:wh-spin  35s linear infinite}
-.wh-r4{animation:wh-rspin 25s linear infinite}
-.wh-r5{animation:wh-spin  18s linear infinite}
-.wh-r6{animation:wh-rspin 12s linear infinite}
-.wh-r0{animation:wh-spin  90s linear infinite}
-@keyframes wh-spin {to{transform:rotate(360deg)}}
-@keyframes wh-rspin{to{transform:rotate(-360deg)}}
-.wh-stage[data-state="transferring"] .wh-r0{animation-duration:22.5s}
-.wh-stage[data-state="transferring"] .wh-r1{animation-duration:15s}
-.wh-stage[data-state="transferring"] .wh-r2{animation-duration:11.25s}
-.wh-stage[data-state="transferring"] .wh-r3{animation-duration:8.75s}
-.wh-stage[data-state="transferring"] .wh-r4{animation-duration:6.25s}
-.wh-stage[data-state="transferring"] .wh-r5{animation-duration:4.4s}
-.wh-stage[data-state="transferring"] .wh-r6{animation-duration:2.5s}
-.wh-stage[data-state="bursting"] .wh-r0{animation-duration:2.4s}
-.wh-stage[data-state="bursting"] .wh-r1{animation-duration:1.6s}
-.wh-stage[data-state="bursting"] .wh-r2{animation-duration:1.2s}
-.wh-stage[data-state="bursting"] .wh-r3{animation-duration:0.9s}
-.wh-stage[data-state="bursting"] .wh-r4{animation-duration:0.7s}
-.wh-stage[data-state="bursting"] .wh-r5{animation-duration:0.5s}
-.wh-stage[data-state="bursting"] .wh-r6{animation-duration:0.35s}
-.wh-beacon{transform-origin:300px 300px;transform-box:fill-box;animation:wh-beacon 3.2s ease-in-out infinite}
-.wh-beacon-in{transform-origin:300px 300px;transform-box:fill-box;animation:wh-beacon 3.2s ease-in-out infinite;animation-delay:.4s}
-@keyframes wh-beacon{0%,100%{opacity:.45;filter:brightness(1)}50%{opacity:1;filter:brightness(1.6)}}
-.wh-core-wrap{display:grid;place-items:center;pointer-events:none}
-.wh-core{width:34%;height:34%;border-radius:50%;position:relative;background-color:#08080c;
-  background-image:
-    radial-gradient(ellipse 14% 10% at 36% 26%,rgba(255,255,255,1) 0%,rgba(255,255,255,.85) 25%,rgba(255,255,255,.4) 55%,transparent 80%),
-    radial-gradient(ellipse 50% 38% at 32% 28%,rgba(255,255,255,1) 0%,rgba(252,254,255,.82) 22%,rgba(240,245,255,.42) 50%,transparent 82%),
-    radial-gradient(ellipse 40% 32% at 70% 72%,rgba(255,255,255,.95) 0%,rgba(235,242,255,.55) 32%,transparent 82%),
-    radial-gradient(ellipse 62% 56% at 30% 65%,rgba(180,140,235,.42) 0%,rgba(150,120,215,.22) 42%,transparent 78%),
-    radial-gradient(ellipse 58% 52% at 68% 32%,rgba(140,200,240,.42) 0%,rgba(110,180,230,.22) 42%,transparent 78%),
-    radial-gradient(ellipse 56% 52% at 50% 18%,rgba(140,230,200,.36) 0%,rgba(110,210,180,.18) 42%,transparent 78%),
-    radial-gradient(ellipse 60% 50% at 24% 80%,rgba(255,200,120,.3) 0%,rgba(240,180,90,.15) 40%,transparent 78%),
-    radial-gradient(circle at 50% 50%,#f0f2f8 0%,#c8ccd6 18%,#8e92a0 38%,#4a4d58 62%,#1c1e26 84%,#08080e 100%);
-  background-size:130% 130%,160% 160%,160% 160%,180% 180%,180% 180%,180% 180%,170% 170%,120% 120%;
-  background-position:36% 26%,20% 30%,70% 70%,20% 50%,70% 50%,50% 30%,24% 80%,50% 50%;
-  background-repeat:no-repeat;
-  box-shadow:0 0 60px rgba(255,184,0,.45),0 0 130px rgba(255,136,0,.28),0 0 220px rgba(255,100,0,.18),0 0 80px rgba(210,215,230,.18),0 0 140px rgba(190,200,220,.1),inset 0 0 22px rgba(255,255,255,.38),inset 0 0 50px rgba(255,252,240,.22),inset 0 0 90px rgba(255,240,200,.14);
-  -webkit-mask:radial-gradient(circle at 50% 50%,rgba(0,0,0,.92) 0%,rgba(0,0,0,.74) 22%,rgba(0,0,0,.52) 42%,rgba(0,0,0,.32) 60%,rgba(0,0,0,.16) 78%,rgba(0,0,0,.06) 92%,transparent 100%);
-          mask:radial-gradient(circle at 50% 50%,rgba(0,0,0,.92) 0%,rgba(0,0,0,.74) 22%,rgba(0,0,0,.52) 42%,rgba(0,0,0,.32) 60%,rgba(0,0,0,.16) 78%,rgba(0,0,0,.06) 92%,transparent 100%);
-  opacity:.86;filter:brightness(1.38) contrast(1.18) saturate(1.12);transition:opacity .35s;
-  animation:wh-breath 3.2s ease-in-out infinite,wh-flow 5s ease-in-out infinite,wh-wobble 4.5s ease-in-out infinite,wh-cspin 42s linear infinite}
-@keyframes wh-cspin{from{rotate:0deg}to{rotate:360deg}}
-@keyframes wh-breath{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.04);filter:brightness(1.12)}}
-@keyframes wh-flow{
-  0%,100%{background-position:36% 26%,22% 30%,70% 68%,10% 55%,80% 45%,50% 22%,22% 80%,50% 50%}
-  33%{background-position:56% 32%,62% 22%,24% 78%,45% 78%,55% 22%,28% 60%,70% 30%,50% 50%}
-  66%{background-position:30% 60%,28% 70%,78% 28%,82% 52%,18% 48%,72% 38%,38% 28%,50% 50%}}
-@keyframes wh-wobble{
-  0%,100%{border-radius:50% 50% 50% 50%/50% 50% 50% 50%}
-  12%{border-radius:63% 37% 44% 56%/40% 60% 60% 40%}
-  25%{border-radius:38% 62% 58% 42%/62% 38% 36% 64%}
-  38%{border-radius:56% 44% 35% 65%/46% 54% 64% 36%}
-  50%{border-radius:44% 56% 62% 38%/58% 42% 39% 61%}
-  63%{border-radius:64% 36% 48% 52%/36% 64% 55% 45%}
-  76%{border-radius:37% 63% 52% 48%/60% 40% 46% 54%}
-  88%{border-radius:54% 46% 42% 58%/47% 53% 58% 42%}}
-.wh-core::before{content:'';position:absolute;inset:-2%;border-radius:50%;
-  background:conic-gradient(from 0deg,rgba(255,255,255,.1),rgba(220,230,250,.16),rgba(200,180,230,.14),rgba(240,240,255,.12),rgba(210,220,245,.18),rgba(230,220,245,.12),rgba(245,240,255,.16),rgba(220,230,250,.12),rgba(255,255,255,.1));
-  -webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,rgba(0,0,0,.85) 50%,rgba(0,0,0,.35) 82%,transparent 100%);
-          mask:radial-gradient(circle at 50% 50%,#000 0%,rgba(0,0,0,.85) 50%,rgba(0,0,0,.35) 82%,transparent 100%);
-  mix-blend-mode:screen;filter:blur(5px);animation:wh-shimmer 5s linear infinite;pointer-events:none}
-@keyframes wh-shimmer{to{transform:rotate(360deg)}}
-.wh-core::after{content:'';position:absolute;top:5%;left:50%;width:48%;height:16%;border-radius:50%;
-  background:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,1) 0%,rgba(255,252,230,.9) 18%,rgba(255,240,200,.5) 42%,transparent 75%);
-  filter:blur(2px);pointer-events:none;transform-origin:50% 260%;
-  animation:wh-hl 5s ease-in-out infinite alternate}
-@keyframes wh-hl{from{transform:translateX(-50%) rotate(-28deg)}to{transform:translateX(-50%) rotate(28deg)}}
-.wh-stage[data-state="transferring"] .wh-core{animation:wh-breath 1.0s ease-in-out infinite,wh-flow 1.55s ease-in-out infinite,wh-wobble 1.4s ease-in-out infinite,wh-cspin 7.5s linear infinite}
-.wh-stage[data-state="transferring"] .wh-core::before{animation-duration:2.4s}
-.wh-stage[data-state="bursting"] .wh-core{animation:wh-burst .5s cubic-bezier(.4,0,.8,1) forwards;opacity:1;
-  -webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,#000 58%,rgba(0,0,0,.85) 72%,rgba(0,0,0,.5) 84%,rgba(0,0,0,.2) 93%,transparent 100%);
-          mask:radial-gradient(circle at 50% 50%,#000 0%,#000 58%,rgba(0,0,0,.85) 72%,rgba(0,0,0,.5) 84%,rgba(0,0,0,.2) 93%,transparent 100%)}
-@keyframes wh-burst{0%{transform:scale(1);filter:brightness(1)}45%{transform:scale(1.5);filter:brightness(2.8)}100%{transform:scale(0);filter:brightness(7);opacity:0}}
-.wh-flash{background:radial-gradient(circle at center,#fff 0%,#fff8d0 28%,rgba(255,200,100,.7) 58%,transparent 82%);opacity:0;pointer-events:none;mix-blend-mode:screen}
-.wh-flash.fire{animation:wh-flash .9s ease-out forwards}
-@keyframes wh-flash{0%{opacity:0;transform:scale(.3)}20%{opacity:1;transform:scale(1)}45%{opacity:1;transform:scale(1.3)}70%{opacity:.7;transform:scale(1.6)}100%{opacity:0;transform:scale(2)}}
-.wh-ripple{border-radius:50%;border:2px solid rgba(255,220,120,.9);box-shadow:0 0 40px rgba(255,200,80,.6);opacity:0;pointer-events:none;transform:scale(0)}
-.wh-ripple.fire{animation:wh-ripple 1.4s ease-out forwards;animation-delay:.55s}
-@keyframes wh-ripple{0%{opacity:0;transform:scale(.05);border-width:8px}20%{opacity:1;transform:scale(.4);border-width:6px}100%{opacity:0;transform:scale(1.6);border-width:1px}}
-.wh-rp2{border-color:rgba(255,240,160,.85);box-shadow:0 0 36px rgba(255,220,130,.55);animation-delay:.75s !important}
-.wh-rp3{border-color:rgba(255,255,255,.7);box-shadow:0 0 28px rgba(255,240,200,.4);animation-delay:.95s !important}
-.wh-stage.shaking{animation:wh-shake .42s cubic-bezier(.36,.07,.19,.97)}
-@keyframes wh-shake{0%{transform:translate(0,0)}15%{transform:translate(-5px,2px)}30%{transform:translate(4px,-4px)}45%{transform:translate(-3px,4px)}60%{transform:translate(3px,-2px)}75%{transform:translate(-2px,2px)}100%{transform:translate(0,0)}}
-.wh-stage[data-state="error"] .wh-core{filter:brightness(.7) saturate(1.4) hue-rotate(-30deg)}
-.wh-stage[data-state="error"]{animation:wh-shake .42s cubic-bezier(.36,.07,.19,.97)}
-#wh-arcs path{fill:none;stroke:#fff8d0;stroke-width:1.4;stroke-linecap:round;opacity:.95}
-#wh-arcs path.fade{opacity:0;transition:opacity .18s ease-out}
-@keyframes wh-arc{from{stroke-dashoffset:var(--arc-len)}to{stroke-dashoffset:0}}
-.wh-label{font-size:10px;font-weight:600;color:var(--beam2);text-align:center;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
 
 /* ── PROGRESS ── */
 .progress-overlay{
@@ -401,82 +305,11 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
             </div>
           </div>
         </div>
-        <!-- Middle — IRONBEAM Wormhole -->
+        <!-- Middle arrows -->
         <div class="xfer-middle">
-          <div class="wh-stage" id="whStage" data-state="idle">
-            <div class="wh-halo"></div>
-            <svg class="wh-rings" viewBox="0 0 600 600">
-              <defs>
-                <radialGradient id="whAtmo" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%"   stop-color="#ffe8a0" stop-opacity="0"/>
-                  <stop offset="40%"  stop-color="#ffb800" stop-opacity=".1"/>
-                  <stop offset="70%"  stop-color="#ff6a00" stop-opacity=".18"/>
-                  <stop offset="100%" stop-color="#000"    stop-opacity="0"/>
-                </radialGradient>
-                <filter id="whBloomLt" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="2" result="b"/>
-                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-                <filter id="whBloomMd" x="-60%" y="-60%" width="220%" height="220%">
-                  <feGaussianBlur stdDeviation="5" result="b"/>
-                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-                <filter id="whBloomHv" x="-70%" y="-70%" width="240%" height="240%">
-                  <feGaussianBlur stdDeviation="9" result="b1"/>
-                  <feMerge><feMergeNode in="b1"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-              </defs>
-              <circle cx="300" cy="300" r="285" fill="url(#whAtmo)"/>
-              <g class="wh-ring wh-r0" filter="url(#whBloomHv)"><circle cx="300" cy="300" r="295" fill="none" stroke="#ff7a00" stroke-width="2" opacity=".2" stroke-dasharray="180 90 240 60 200 100"/></g>
-              <g class="wh-ring wh-r1" filter="url(#whBloomHv)">
-                <circle cx="300" cy="300" r="268" fill="none" stroke="#ff9a30" stroke-width="3" opacity=".3" stroke-dasharray="50 35 90 40 60 30"/>
-                <circle cx="300" cy="300" r="262" fill="none" stroke="#ffd070" stroke-width="1.2" opacity=".55" stroke-dasharray="120 60 200 50"/>
-              </g>
-              <g class="wh-ring wh-r2" filter="url(#whBloomMd)">
-                <circle cx="300" cy="300" r="232" fill="none" stroke="#ffd866" stroke-width="2" opacity=".55" stroke-dasharray="140 60 80 40 110 50"/>
-                <circle cx="300" cy="300" r="238" fill="none" stroke="#ff8800" stroke-width=".6" opacity=".3"/>
-              </g>
-              <g class="wh-ring wh-r3" filter="url(#whBloomHv)">
-                <circle cx="300" cy="300" r="200" fill="none" stroke="#7a4d00" stroke-width=".5" opacity=".35"/>
-                <g class="wh-beacon" fill="#ffb800" opacity=".45">
-                  <circle cx="300" cy="100" r="7"/>
-                  <circle cx="300" cy="100" r="7" transform="rotate(51.43 300 300)"/>
-                  <circle cx="300" cy="100" r="7" transform="rotate(102.86 300 300)"/>
-                  <circle cx="300" cy="100" r="7" transform="rotate(154.29 300 300)"/>
-                  <circle cx="300" cy="100" r="7" transform="rotate(205.71 300 300)"/>
-                  <circle cx="300" cy="100" r="7" transform="rotate(257.14 300 300)"/>
-                  <circle cx="300" cy="100" r="7" transform="rotate(308.57 300 300)"/>
-                </g>
-                <g class="wh-beacon-in" fill="#fff4cc">
-                  <circle cx="300" cy="100" r="3"/>
-                  <circle cx="300" cy="100" r="3" transform="rotate(51.43 300 300)"/>
-                  <circle cx="300" cy="100" r="3" transform="rotate(102.86 300 300)"/>
-                  <circle cx="300" cy="100" r="3" transform="rotate(154.29 300 300)"/>
-                  <circle cx="300" cy="100" r="3" transform="rotate(205.71 300 300)"/>
-                  <circle cx="300" cy="100" r="3" transform="rotate(257.14 300 300)"/>
-                  <circle cx="300" cy="100" r="3" transform="rotate(308.57 300 300)"/>
-                </g>
-              </g>
-              <g class="wh-ring wh-r4" filter="url(#whBloomLt)"><circle cx="300" cy="300" r="170" fill="none" stroke="#ffb800" stroke-width="1.2" opacity=".6" stroke-dasharray="3 9 18 6 8 4"/></g>
-              <g class="wh-ring wh-r5" filter="url(#whBloomMd)">
-                <circle cx="300" cy="300" r="142" fill="none" stroke="#ffd866" stroke-width="1.6" opacity=".75" stroke-dasharray="40 20 70 25 30 15"/>
-                <circle cx="300" cy="300" r="148" fill="none" stroke="#ff8800" stroke-width=".6" opacity=".3"/>
-              </g>
-              <g id="wh-arcs" filter="url(#whBloomHv)"></g>
-              <g class="wh-ring wh-r6" filter="url(#whBloomHv)">
-                <circle cx="300" cy="300" r="115" fill="none" stroke="#fff4cc" stroke-width="1.5" opacity=".85" stroke-dasharray="2 10 20 8"/>
-                <circle cx="300" cy="300" r="108" fill="none" stroke="#ffb800" stroke-width=".6" opacity=".45"/>
-              </g>
-            </svg>
-            <canvas class="wh-particles" id="whParticles"></canvas>
-            <div class="wh-core-wrap"><div class="wh-core" id="whCore"></div></div>
-            <div class="wh-ripple"        id="whRp1"></div>
-            <div class="wh-ripple wh-rp2" id="whRp2"></div>
-            <div class="wh-ripple wh-rp3" id="whRp3"></div>
-            <div class="wh-flash"         id="whFlash"></div>
-          </div>
-          <div class="wh-label" id="whLabel">IRONBEAM</div>
-          <div class="xfer-stats" style="margin-top:4px">
+          <div class="xfer-btn" title="Send to iPhone" onclick="showToast('Select a file on desktop to send to iPhone')">←</div>
+          <div class="xfer-btn" title="Receive from iPhone" onclick="refreshDesktopFiles()">→</div>
+          <div class="xfer-stats">
             <div class="xs-val" id="xferCount">0</div>
             <div class="xs-lbl">transfers</div>
           </div>
@@ -677,14 +510,6 @@ function onFileReceived(data) {
   const badge = document.getElementById('filesBadge');
   badge.style.display = 'flex';
   badge.textContent = state.totalTransfers > 99 ? '99+' : state.totalTransfers;
-  // Trigger wormhole animation
-  IBWormhole.open(data.name);
-  let p = 0;
-  const ramp = setInterval(() => {
-    p = Math.min(1, p + 0.07);
-    IBWormhole.progress(p);
-    if (p >= 1) { clearInterval(ramp); IBWormhole.complete(`${fmt(data.size || 0)} received`); }
-  }, 40);
 }
 
 function onFsChange() {
@@ -833,165 +658,6 @@ function timeAgo(ts) {
   if(s<60)return'just now';if(s<3600)return Math.round(s/60)+'m ago';
   if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago';
 }
-
-// ────────────────────────────────────────────────────────────────────────
-// IRONBEAM Wormhole — © 2025 IRONBEAM Technologies. Confidential.
-// ────────────────────────────────────────────────────────────────────────
-window.IBWormhole = (function(){
-  const SVGNS='http://www.w3.org/2000/svg';
-  let stage, canvas, ctx, flash, ripples, arcs, label;
-  let state='idle', progress=0, particles=[], sparks=[], sparkAcc=0;
-  let raf=null, lastT=performance.now(), bursting=false;
-  const MAX_P=90, MAX_S=10;
-
-  function gid(id){return document.getElementById(id);}
-  function init(){
-    stage=gid('whStage');
-    if(!stage) return false;
-    canvas=gid('whParticles'); ctx=canvas.getContext('2d');
-    flash=gid('whFlash'); arcs=gid('wh-arcs');
-    ripples=[gid('whRp1'),gid('whRp2'),gid('whRp3')];
-    label=gid('whLabel');
-    window.addEventListener('resize', resize);
-    resize();
-    // Keep animation alive in idle so rings spin continuously
-    lastT=performance.now();
-    raf=requestAnimationFrame(tick);
-    return true;
-  }
-  function resize(){
-    if(!canvas||!stage) return;
-    const dpr=Math.min(window.devicePixelRatio||1,2);
-    const w=stage.clientWidth, h=stage.clientHeight;
-    canvas.width=w*dpr; canvas.height=h*dpr;
-    canvas.style.width=w+'px'; canvas.style.height=h+'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-  }
-  function spawnP(){
-    const w=stage.clientWidth, h=stage.clientHeight;
-    const maxR=Math.min(w,h)*0.46, minR=Math.min(w,h)*0.10;
-    const isHead=Math.random()<0.08;
-    return {cx:w/2, cy:h/2, angle:Math.random()*Math.PI*2,
-      radius:maxR*(0.9+Math.random()*0.15), maxR, minR,
-      angVel:isHead?(0.4+Math.random()*0.7):(0.6+Math.random()*1.4),
-      inVel: isHead?(14+Math.random()*16):(18+Math.random()*22),
-      size:  isHead?(2.4+Math.random()*2):(0.8+Math.random()*1.8),
-      brightness:isHead?2:1, isHead};
-  }
-  function spawnSpark(){
-    const w=stage.clientWidth, h=stage.clientHeight, base=Math.min(w,h);
-    return {cx:w/2, cy:h/2, angle:Math.random()*Math.PI*2,
-      radius:base*(0.36+Math.random()*0.08), life:0,
-      lifeMax:0.45+Math.random()*0.30, baseSize:1+Math.random()*1.6};
-  }
-  function tick(now){
-    const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
-    ctx.globalCompositeOperation='source-over';
-    ctx.fillStyle='rgba(5,3,8,'+(state==='idle'?'0.18':'0.12')+')';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.globalCompositeOperation='lighter';
-    if(state==='transferring'||state==='bursting'){
-      const spawn=(state==='bursting'?22:6)+(progress*9);
-      sparkAcc+=dt*spawn;
-      while(sparkAcc>=1&&sparks.length<MAX_S){sparks.push(spawnSpark());sparkAcc-=1;}
-    } else sparkAcc=0;
-    for(let i=sparks.length-1;i>=0;i--){
-      const s=sparks[i]; s.life+=dt;
-      const u=s.life/s.lifeMax;
-      if(u>=1){sparks.splice(i,1);continue;}
-      const sz=s.baseSize*(1+u*5), a=(1-u)*(1-u);
-      const x=s.cx+Math.cos(s.angle)*s.radius, y=s.cy+Math.sin(s.angle)*s.radius;
-      ctx.beginPath(); ctx.fillStyle='rgba(255,248,208,'+a+')';
-      ctx.shadowColor='rgba(255,220,130,1)'; ctx.shadowBlur=12+u*16;
-      ctx.arc(x,y,sz,0,Math.PI*2); ctx.fill();
-    }
-    if(state!=='idle'||particles.length<20){
-      while(particles.length<MAX_P) particles.push(spawnP());
-    }
-    const speedMul=state==='idle'?0.18:(0.3+(0.4+progress*0.9)*2.4);
-    const burstMul=state==='bursting'?7:1;
-    for(let i=particles.length-1;i>=0;i--){
-      const p=particles[i];
-      const rN=p.radius/p.maxR;
-      p.angle+=p.angVel*(1+(1-rN)*3.5+0.15)*speedMul*burstMul*dt;
-      p.radius-=p.inVel*(1+(1-rN)*1.8)*speedMul*burstMul*dt;
-      const t=1-rN,r=255,g=Math.round(184+(255-184)*t),b=Math.round(220*Math.pow(t,1.4));
-      const a=Math.min(1,(0.4+t*0.9)*p.brightness)*(state==='idle'?0.35:1);
-      const sz=p.size*(1+t*1.4);
-      const x=p.cx+Math.cos(p.angle)*p.radius, y=p.cy+Math.sin(p.angle)*p.radius;
-      ctx.beginPath(); ctx.fillStyle='rgba('+r+','+g+','+b+','+a+')';
-      ctx.shadowColor='rgba('+r+','+g+','+b+',0.9)';
-      ctx.shadowBlur=(8+t*12)*(p.isHead?1.6:1);
-      ctx.arc(x,y,sz,0,Math.PI*2); ctx.fill();
-      if(p.radius<p.minR*0.85){
-        if(state==='idle') particles.splice(i,1);
-        else particles[i]=spawnP();
-      }
-    }
-    ctx.shadowBlur=0;
-    raf=requestAnimationFrame(tick);
-  }
-  function setState(s){ state=s; if(stage) stage.dataset.state=s; }
-  function spawnLightning(){
-    if(!arcs) return;
-    while(arcs.firstChild) arcs.removeChild(arcs.firstChild);
-    const count=5+Math.floor(Math.random()*2);
-    for(let i=0;i<count;i++){
-      const base=(i/count)*Math.PI*2+Math.random()*0.5;
-      const sr=260, er=75, segs=7+Math.floor(Math.random()*4);
-      let d='';
-      for(let j=0;j<=segs;j++){
-        const t2=j/segs, r=sr+(er-sr)*t2;
-        const ang=base+(Math.random()-0.5)*0.18*(1-Math.abs(t2-0.5));
-        d+=(j===0?'M':'L')+(300+Math.cos(ang)*r).toFixed(1)+' '+(300+Math.sin(ang)*r).toFixed(1)+' ';
-      }
-      const path=document.createElementNS(SVGNS,'path');
-      path.setAttribute('d',d); arcs.appendChild(path);
-      const len=path.getTotalLength?path.getTotalLength():400;
-      path.setAttribute('stroke-dasharray',len);
-      path.style.setProperty('--arc-len',len);
-      path.style.animation='wh-arc 0.15s ease-out forwards';
-    }
-    setTimeout(()=>Array.from(arcs.children).forEach(p=>p.classList.add('fade')),360);
-    setTimeout(()=>{while(arcs&&arcs.firstChild)arcs.removeChild(arcs.firstChild);},600);
-  }
-  function open(filename){
-    if(!stage&&!init()) return;
-    setState('transferring');
-    if(label) label.textContent=filename||'Transferring…';
-    progress=0; sparks=[]; particles=[];
-    if(!raf){lastT=performance.now(); raf=requestAnimationFrame(tick);}
-  }
-  function pct(p){
-    if(!stage) return;
-    progress=(p>1)?p/100:p;
-    if(state!=='transferring'&&state!=='bursting') setState('transferring');
-  }
-  function complete(text){
-    if(!stage||bursting) return;
-    bursting=true; setState('bursting'); progress=1;
-    spawnLightning();
-    setTimeout(()=>{
-      if(stage){stage.classList.remove('shaking');void stage.offsetWidth;stage.classList.add('shaking');}
-      if(flash){flash.classList.remove('fire');void flash.offsetWidth;flash.classList.add('fire');}
-      ripples.forEach(r=>{if(r){r.classList.remove('fire');void r.offsetWidth;r.classList.add('fire');}});
-      setTimeout(()=>stage&&stage.classList.remove('shaking'),450);
-    },580);
-    setTimeout(()=>{if(label) label.textContent='✦ Complete';},1500);
-    setTimeout(()=>{_idle();bursting=false;},2800);
-  }
-  function _idle(){
-    setState('idle');
-    if(flash) flash.classList.remove('fire');
-    if(ripples) ripples.forEach(r=>r&&r.classList.remove('fire'));
-    while(arcs&&arcs.firstChild) arcs.removeChild(arcs.firstChild);
-    progress=0; sparks=[]; particles=[];
-    if(label) label.textContent='IRONBEAM';
-  }
-
-  document.addEventListener('DOMContentLoaded',()=>{init();});
-  return {open, progress:pct, complete, idle:_idle};
-})();
 </script>
 </body>
 </html>

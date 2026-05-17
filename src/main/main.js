@@ -3,10 +3,9 @@
  * © 2025 IRONBEAM Technologies - ironbeam.ca
  */
 const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, shell, Notification } = require('electron');
-const path    = require('path');
-const fs      = require('fs');
-const os      = require('os');
-const QRCode  = require('qrcode');
+const path = require('path');
+const fs   = require('fs');
+const os   = require('os');
 
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) { app.quit(); process.exit(0); }
@@ -63,14 +62,12 @@ function createWindow() {
     icon: iconPath || undefined,
     webPreferences: {
       nodeIntegration: false, contextIsolation: true,
-      preload: app.isPackaged
-        ? path.join(process.resourcesPath, 'app.asar', 'src', 'main', 'preload.js')
-        : path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.js'),
     },
   });
 
   const rendererPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'app.asar', 'src', 'renderer', 'index.html')
+    ? path.join(process.resourcesPath, 'src', 'renderer', 'index.html')
     : path.join(__dirname, '../renderer/index.html');
   mainWindow.loadFile(rendererPath);
 
@@ -135,9 +132,6 @@ ipcMain.handle('list-files', () => {
 ipcMain.handle('open-file', (_, n) => shell.openPath(path.join(TRANSFER_DIR, n)));
 ipcMain.handle('open-folder', () => shell.openPath(TRANSFER_DIR));
 ipcMain.handle('delete-file', (_, n) => { try { fs.unlinkSync(path.join(TRANSFER_DIR, n)); return true; } catch { return false; } });
-ipcMain.handle('generate-qr', async (_, url) => {
-  return QRCode.toDataURL(url, { width: 240, margin: 1, color: { dark: '#000000', light: '#ffffff' } });
-});
 ipcMain.handle('get-mobileconfig', () => {
   const p = path.join(TRANSFER_DIR, 'IRONBEAM-Trust.mobileconfig');
   return fs.existsSync(p) ? p : null;
