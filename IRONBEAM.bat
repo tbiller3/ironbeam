@@ -30,9 +30,9 @@ if not exist "%~dp0node_modules\express\" (
 )
 
 :: Launch Electron if available, otherwise run headless server
-if exist "%~dp0node_modules\.bin\electron.cmd" (
+if exist "node_modules\.bin\electron.cmd" (
   echo  Launching IRONBEAM desktop app...
-  "%~dp0node_modules\.bin\electron.cmd" "%~dp0"
+  "node_modules\.bin\electron.cmd" .
 ) else (
   echo  Starting IRONBEAM server...
   echo  ^(For the full desktop app, run: npm install ^& npm start^)
