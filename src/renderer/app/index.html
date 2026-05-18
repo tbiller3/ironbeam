@@ -18,19 +18,20 @@
   --r:10px;--rs:7px;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-app-region:no-drag}
-html,body{height:100%;background:var(--bg);color:var(--steel);font-family:-apple-system,'Segoe UI','Helvetica Neue',sans-serif;overflow:hidden;font-size:13px;line-height:1.5}
+html,body{height:100%;background:var(--bg);background-image:radial-gradient(ellipse 160% 80% at 50% -10%,rgba(255,184,0,.04) 0%,transparent 55%);color:var(--steel);font-family:-apple-system,'Segoe UI','Helvetica Neue',sans-serif;overflow:hidden;font-size:13px;line-height:1.5}
 button{font-family:inherit;cursor:pointer;border:none;outline:none;-webkit-appearance:none}
 input{font-family:inherit;outline:none;-webkit-appearance:none}
 
 /* ── TITLEBAR ── */
 .titlebar{
-  height:38px;background:var(--bg2);border-bottom:1px solid var(--b2);
+  height:40px;background:var(--bg2);border-bottom:1px solid var(--b2);
+  box-shadow:0 1px 0 rgba(232,160,32,.08);
   display:flex;align-items:center;padding:0 12px 0 16px;
   -webkit-app-region:drag;flex-shrink:0;gap:10px;
 }
 .tb-logo{display:flex;align-items:center;gap:8px;-webkit-app-region:no-drag}
 .tb-logo svg{width:22px;height:22px}
-.tb-brand{font-size:13px;font-weight:600;letter-spacing:.14em;color:var(--beam2)}
+.tb-brand{font-size:12px;font-weight:700;letter-spacing:.22em;color:var(--beam2);text-shadow:0 0 18px rgba(245,192,80,.45)}
 .tb-spacer{flex:1}
 .tb-status{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--b2);border-radius:20px;padding:4px 10px;-webkit-app-region:no-drag}
 .tb-dot{width:6px;height:6px;border-radius:50%;background:#444;transition:all .3s}
@@ -44,7 +45,7 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 .wc.close:hover{background:var(--red);color:white}
 
 /* ── LAYOUT ── */
-.layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 38px)}
+.layout{display:grid;grid-template-columns:200px 1fr;height:calc(100vh - 40px)}
 
 /* ── SIDEBAR ── */
 .sidebar{background:var(--bg2);border-right:1px solid var(--b2);display:flex;flex-direction:column;overflow:hidden}
@@ -55,13 +56,13 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
   color:var(--steel2);font-size:13px;transition:all .15s;
 }
 .nav-item:hover{background:var(--bg3);color:var(--steel)}
-.nav-item.active{background:var(--beam3);color:var(--beam2)}
+.nav-item.active{background:var(--beam3);color:var(--beam2);box-shadow:inset 3px 0 0 var(--beam),0 0 12px rgba(232,160,32,.08)}
 .nav-item svg{width:16px;height:16px;flex-shrink:0}
 .nav-bottom{margin-top:auto;padding:10px;border-top:1px solid var(--b2)}
 .device-card{background:var(--bg3);border:1px solid var(--b2);border-radius:var(--r);padding:10px 12px}
 .dc-head{display:flex;align-items:center;gap:6px;margin-bottom:4px}
 .dc-dot{width:7px;height:7px;border-radius:50%;background:#444}
-.dc-dot.on{background:var(--green);box-shadow:0 0 4px var(--green)}
+.dc-dot.on{background:var(--green);box-shadow:0 0 6px var(--green),0 0 12px rgba(29,158,117,.4);animation:pulse 2s infinite}
 .dc-label{font-size:11px;font-weight:600;color:var(--steel)}
 .dc-ip{font-size:10px;color:var(--steel3);font-family:'SF Mono','Consolas',monospace}
 
@@ -71,8 +72,8 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 
 /* ── PANEL HEADER ── */
 .panel-header{padding:20px 24px 16px;border-bottom:1px solid var(--b2);flex-shrink:0}
-.panel-title{font-size:18px;font-weight:600;color:var(--steel);letter-spacing:-.01em}
-.panel-sub{font-size:12px;color:var(--steel3);margin-top:3px}
+.panel-title{font-size:17px;font-weight:600;color:var(--steel);letter-spacing:-.02em}
+.panel-sub{font-size:11px;color:var(--steel3);margin-top:4px;letter-spacing:.01em}
 
 /* ── TRANSFER PANEL ── */
 .transfer-layout{display:grid;grid-template-columns:1fr 64px 1fr;flex:1;overflow:hidden}
@@ -91,13 +92,17 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
   cursor:grab;transition:all .15s;margin-bottom:2px;
   user-select:none;-webkit-user-select:none;
 }
-.file-card:hover{background:var(--bg3);border-color:var(--b2)}
+.file-card:hover{background:var(--bg3);border-color:var(--b2);box-shadow:inset 2px 0 0 rgba(232,160,32,.35)}
 .file-card:active{cursor:grabbing}
 .file-card.dragging{opacity:.4;border-color:var(--b1);background:var(--bg3)}
 .file-card.new{animation:arrive .35s cubic-bezier(.34,1.56,.64,1)}
 /* Wormhole drag-over highlight */
-.wh-stage.drag-active{filter:drop-shadow(0 0 18px rgba(255,184,0,.7))}
-.wh-stage.drag-active .wh-core{opacity:1;filter:brightness(2) saturate(1.4)}
+.wh-stage{transition:transform .22s cubic-bezier(.34,1.56,.64,1),filter .22s ease}
+.wh-stage.drag-active{
+  filter:drop-shadow(0 0 22px rgba(255,184,0,.9)) drop-shadow(0 0 50px rgba(255,100,0,.45));
+  transform:scale(1.08);
+}
+.wh-stage.drag-active .wh-core{opacity:1;filter:brightness(2.2) saturate(1.2)}
 @keyframes arrive{0%{transform:scale(.8) translateY(8px);opacity:0}100%{transform:scale(1);opacity:1}}
 .fc-icon{width:34px;height:34px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .fc-meta{flex:1;min-width:0}
@@ -117,21 +122,22 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 .transfer-layout{grid-template-columns:1fr 180px 1fr !important}
 .xfer-middle{
   border-left:1px solid var(--b2);border-right:1px solid var(--b2);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-  background:var(--bg);padding:10px 6px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(180deg,var(--bg) 0%,rgba(15,10,5,.6) 50%,var(--bg) 100%);
+  padding:10px 6px;
 }
-.xfer-stats{display:flex;flex-direction:column;align-items:center;gap:1px}
-.xs-val{font-size:13px;font-weight:600;color:var(--beam2);font-variant-numeric:tabular-nums}
-.xs-lbl{font-size:9px;color:var(--steel3);letter-spacing:.1em;text-transform:uppercase}
+.xfer-stats{display:flex;flex-direction:column;align-items:center;gap:2px}
+.xs-val{font-size:16px;font-weight:700;color:var(--beam2);font-variant-numeric:tabular-nums;letter-spacing:-.01em;text-shadow:0 0 14px rgba(245,192,80,.3)}
+.xs-lbl{font-size:9px;color:var(--steel3);letter-spacing:.12em;text-transform:uppercase}
 
 /* ── IRONBEAM Wormhole (desktop) ── */
 .wh-stage{position:relative;width:148px;height:148px;display:grid;place-items:center}
 .wh-stage > *{position:absolute;inset:0;width:100%;height:100%}
-.wh-halo{background:radial-gradient(circle at 50% 50%,rgba(255,184,0,.18) 0%,rgba(255,136,0,.10) 22%,rgba(120,60,0,.05) 45%,transparent 65%);filter:blur(6px);animation:wh-halo 4s ease-in-out infinite;pointer-events:none}
-@keyframes wh-halo{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.05)}}
+.wh-halo{background:radial-gradient(circle at 50% 50%,rgba(255,200,60,.22) 0%,rgba(255,140,0,.13) 20%,rgba(180,80,0,.07) 42%,transparent 62%);filter:blur(8px);animation:wh-halo 4s ease-in-out infinite;pointer-events:none}
+@keyframes wh-halo{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
 .wh-particles{-webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,#000 62%,rgba(0,0,0,.75) 78%,rgba(0,0,0,.35) 90%,transparent 100%);mask:radial-gradient(circle at 50% 50%,#000 0%,#000 62%,rgba(0,0,0,.75) 78%,rgba(0,0,0,.35) 90%,transparent 100%)}
 .wh-rings{overflow:visible}
-.wh-ring{transform-origin:300px 300px;transform-box:fill-box}
+.wh-ring{transform-origin:300px 300px;transform-box:view-box}
 .wh-r1{animation:wh-spin  60s linear infinite}
 .wh-r2{animation:wh-rspin 45s linear infinite}
 .wh-r3{animation:wh-spin  35s linear infinite}
@@ -141,48 +147,59 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 .wh-r0{animation:wh-spin  90s linear infinite}
 @keyframes wh-spin {to{transform:rotate(360deg)}}
 @keyframes wh-rspin{to{transform:rotate(-360deg)}}
-.wh-stage[data-state="transferring"] .wh-r0{animation-duration:22.5s}
-.wh-stage[data-state="transferring"] .wh-r1{animation-duration:15s}
-.wh-stage[data-state="transferring"] .wh-r2{animation-duration:11.25s}
-.wh-stage[data-state="transferring"] .wh-r3{animation-duration:8.75s}
-.wh-stage[data-state="transferring"] .wh-r4{animation-duration:6.25s}
-.wh-stage[data-state="transferring"] .wh-r5{animation-duration:4.4s}
-.wh-stage[data-state="transferring"] .wh-r6{animation-duration:2.5s}
-.wh-stage[data-state="bursting"] .wh-r0{animation-duration:2.4s}
-.wh-stage[data-state="bursting"] .wh-r1{animation-duration:1.6s}
-.wh-stage[data-state="bursting"] .wh-r2{animation-duration:1.2s}
-.wh-stage[data-state="bursting"] .wh-r3{animation-duration:0.9s}
-.wh-stage[data-state="bursting"] .wh-r4{animation-duration:0.7s}
-.wh-stage[data-state="bursting"] .wh-r5{animation-duration:0.5s}
-.wh-stage[data-state="bursting"] .wh-r6{animation-duration:0.35s}
-.wh-beacon{transform-origin:300px 300px;transform-box:fill-box;animation:wh-beacon 3.2s ease-in-out infinite}
-.wh-beacon-in{transform-origin:300px 300px;transform-box:fill-box;animation:wh-beacon 3.2s ease-in-out infinite;animation-delay:.4s}
+.wh-stage[data-state="transferring"] .wh-r0{animation-duration:8s}
+.wh-stage[data-state="transferring"] .wh-r1{animation-duration:4.5s}
+.wh-stage[data-state="transferring"] .wh-r2{animation-duration:3.2s}
+.wh-stage[data-state="transferring"] .wh-r3{animation-duration:2.2s}
+.wh-stage[data-state="transferring"] .wh-r4{animation-duration:1.6s}
+.wh-stage[data-state="transferring"] .wh-r5{animation-duration:1.0s}
+.wh-stage[data-state="transferring"] .wh-r6{animation-duration:0.6s}
+.wh-stage[data-state="bursting"] .wh-r0{animation-duration:1.4s}
+.wh-stage[data-state="bursting"] .wh-r1{animation-duration:0.8s}
+.wh-stage[data-state="bursting"] .wh-r2{animation-duration:0.55s}
+.wh-stage[data-state="bursting"] .wh-r3{animation-duration:0.38s}
+.wh-stage[data-state="bursting"] .wh-r4{animation-duration:0.28s}
+.wh-stage[data-state="bursting"] .wh-r5{animation-duration:0.18s}
+.wh-stage[data-state="bursting"] .wh-r6{animation-duration:0.12s}
+.wh-beacon{transform-origin:300px 300px;transform-box:view-box;animation:wh-beacon 3.2s ease-in-out infinite}
+.wh-beacon-in{transform-origin:300px 300px;transform-box:view-box;animation:wh-beacon 3.2s ease-in-out infinite;animation-delay:.4s}
 @keyframes wh-beacon{0%,100%{opacity:.45;filter:brightness(1)}50%{opacity:1;filter:brightness(1.6)}}
 .wh-core-wrap{display:grid;place-items:center;pointer-events:none}
-.wh-core{width:34%;height:34%;border-radius:50%;position:relative;background-color:#08080c;
+.wh-core{width:34%;height:34%;border-radius:50%;position:relative;background-color:#020408;
   background-image:
-    radial-gradient(ellipse 14% 10% at 36% 26%,rgba(255,255,255,1) 0%,rgba(255,255,255,.85) 25%,rgba(255,255,255,.4) 55%,transparent 80%),
-    radial-gradient(ellipse 50% 38% at 32% 28%,rgba(255,255,255,1) 0%,rgba(252,254,255,.82) 22%,rgba(240,245,255,.42) 50%,transparent 82%),
-    radial-gradient(ellipse 40% 32% at 70% 72%,rgba(255,255,255,.95) 0%,rgba(235,242,255,.55) 32%,transparent 82%),
-    radial-gradient(ellipse 62% 56% at 30% 65%,rgba(180,140,235,.42) 0%,rgba(150,120,215,.22) 42%,transparent 78%),
-    radial-gradient(ellipse 58% 52% at 68% 32%,rgba(140,200,240,.42) 0%,rgba(110,180,230,.22) 42%,transparent 78%),
-    radial-gradient(ellipse 56% 52% at 50% 18%,rgba(140,230,200,.36) 0%,rgba(110,210,180,.18) 42%,transparent 78%),
-    radial-gradient(ellipse 60% 50% at 24% 80%,rgba(255,200,120,.3) 0%,rgba(240,180,90,.15) 40%,transparent 78%),
-    radial-gradient(circle at 50% 50%,#f0f2f8 0%,#c8ccd6 18%,#8e92a0 38%,#4a4d58 62%,#1c1e26 84%,#08080e 100%);
-  background-size:130% 130%,160% 160%,160% 160%,180% 180%,180% 180%,180% 180%,170% 170%,120% 120%;
-  background-position:36% 26%,20% 30%,70% 70%,20% 50%,70% 50%,50% 30%,24% 80%,50% 50%;
+    /* needle-point specular — the intense white glint on liquid metal */
+    radial-gradient(ellipse 7% 5% at 30% 22%,rgba(255,255,255,1) 0%,rgba(255,255,255,.80) 20%,transparent 54%),
+    /* primary chrome lobe — broad curved-mirror highlight */
+    radial-gradient(ellipse 52% 38% at 27% 24%,rgba(255,255,255,1) 0%,rgba(245,252,255,.86) 13%,rgba(200,225,252,.36) 34%,transparent 68%),
+    /* secondary lobe — opposite corner, makes it look like two reflections */
+    radial-gradient(ellipse 44% 32% at 75% 78%,rgba(255,255,255,.95) 0%,rgba(225,244,255,.50) 22%,transparent 62%),
+    /* deep shadow valley — mercury has near-black between its bright zones */
+    radial-gradient(ellipse 58% 46% at 52% 56%,rgba(1,2,6,.72) 0%,rgba(1,2,6,.18) 52%,transparent 72%),
+    /* chrome banding base — conic mimics the sweeping reflection of a curved mirror */
+    conic-gradient(from 55deg at 50% 50%,
+      #020408 0%,#0e1220 6%,#242c3e 12%,#4a5468 18%,#8892a4 24%,
+      #bec8d4 29%,#dce6f0 33%,#f4f8fc 37%,#fafcff 40%,#ecf2f8 43%,
+      #ccd4e0 47%,#8a94a6 52%,#424e60 58%,#181e2c 64%,
+      #060a12 70%,#0c1020 76%,#202838 82%,#404e62 88%,#161c28 94%,#020408 100%);
+  background-size:108% 108%,152% 152%,152% 152%,158% 158%,118% 118%;
+  background-position:30% 22%,16% 24%,75% 78%,52% 56%,50% 50%;
   background-repeat:no-repeat;
-  box-shadow:0 0 60px rgba(255,184,0,.45),0 0 130px rgba(255,136,0,.28),0 0 220px rgba(255,100,0,.18),0 0 80px rgba(210,215,230,.18),0 0 140px rgba(190,200,220,.1),inset 0 0 22px rgba(255,255,255,.38),inset 0 0 50px rgba(255,252,240,.22),inset 0 0 90px rgba(255,240,200,.14);
-  -webkit-mask:radial-gradient(circle at 50% 50%,rgba(0,0,0,.92) 0%,rgba(0,0,0,.74) 22%,rgba(0,0,0,.52) 42%,rgba(0,0,0,.32) 60%,rgba(0,0,0,.16) 78%,rgba(0,0,0,.06) 92%,transparent 100%);
-          mask:radial-gradient(circle at 50% 50%,rgba(0,0,0,.92) 0%,rgba(0,0,0,.74) 22%,rgba(0,0,0,.52) 42%,rgba(0,0,0,.32) 60%,rgba(0,0,0,.16) 78%,rgba(0,0,0,.06) 92%,transparent 100%);
-  opacity:.86;filter:brightness(1.38) contrast(1.18) saturate(1.12);transition:opacity .35s;
-  animation:wh-breath 3.2s ease-in-out infinite,wh-flow 5s ease-in-out infinite,wh-wobble 4.5s ease-in-out infinite,wh-cspin 42s linear infinite}
+  box-shadow:0 0 50px rgba(255,184,0,.40),0 0 110px rgba(255,136,0,.22),0 0 180px rgba(255,100,0,.14),
+    0 0 14px rgba(195,215,245,.32),
+    inset 0 0 2px rgba(255,255,255,.24),
+    inset 0 0 12px rgba(255,255,255,.68),
+    inset 0 0 28px rgba(215,234,255,.42),
+    inset 0 0 58px rgba(172,200,238,.24);
+  -webkit-mask:radial-gradient(circle at 50% 50%,rgba(0,0,0,.97) 0%,rgba(0,0,0,.82) 16%,rgba(0,0,0,.60) 36%,rgba(0,0,0,.36) 54%,rgba(0,0,0,.16) 74%,rgba(0,0,0,.05) 88%,transparent 100%);
+          mask:radial-gradient(circle at 50% 50%,rgba(0,0,0,.97) 0%,rgba(0,0,0,.82) 16%,rgba(0,0,0,.60) 36%,rgba(0,0,0,.36) 54%,rgba(0,0,0,.16) 74%,rgba(0,0,0,.05) 88%,transparent 100%);
+  opacity:.96;filter:brightness(1.65) contrast(1.48) saturate(0.52);transition:opacity .35s;
+  animation:wh-breath 3.2s ease-in-out infinite,wh-flow 3.4s ease-in-out infinite,wh-wobble 4.5s ease-in-out infinite,wh-cspin 10s linear infinite}
 @keyframes wh-cspin{from{rotate:0deg}to{rotate:360deg}}
 @keyframes wh-breath{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.04);filter:brightness(1.12)}}
 @keyframes wh-flow{
-  0%,100%{background-position:36% 26%,22% 30%,70% 68%,10% 55%,80% 45%,50% 22%,22% 80%,50% 50%}
-  33%{background-position:56% 32%,62% 22%,24% 78%,45% 78%,55% 22%,28% 60%,70% 30%,50% 50%}
-  66%{background-position:30% 60%,28% 70%,78% 28%,82% 52%,18% 48%,72% 38%,38% 28%,50% 50%}}
+  0%,100%{background-position:30% 22%,16% 24%,75% 78%,52% 56%,50% 50%}
+  30%    {background-position:52% 28%,68% 14%,18% 84%,52% 56%,50% 50%}
+  65%    {background-position:24% 66%,20% 70%,84% 18%,52% 56%,50% 50%}}
 @keyframes wh-wobble{
   0%,100%{border-radius:50% 50% 50% 50%/50% 50% 50% 50%}
   12%{border-radius:63% 37% 44% 56%/40% 60% 60% 40%}
@@ -193,17 +210,17 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
   76%{border-radius:37% 63% 52% 48%/60% 40% 46% 54%}
   88%{border-radius:54% 46% 42% 58%/47% 53% 58% 42%}}
 .wh-core::before{content:'';position:absolute;inset:-2%;border-radius:50%;
-  background:conic-gradient(from 0deg,rgba(255,255,255,.1),rgba(220,230,250,.16),rgba(200,180,230,.14),rgba(240,240,255,.12),rgba(210,220,245,.18),rgba(230,220,245,.12),rgba(245,240,255,.16),rgba(220,230,250,.12),rgba(255,255,255,.1));
+  background:conic-gradient(from 0deg,rgba(255,255,255,.16),rgba(235,245,255,.45),rgba(218,232,255,.36),rgba(248,254,255,.28),rgba(228,240,255,.42),rgba(240,250,255,.30),rgba(252,255,255,.38),rgba(235,246,255,.24),rgba(255,255,255,.16));
   -webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,rgba(0,0,0,.85) 50%,rgba(0,0,0,.35) 82%,transparent 100%);
           mask:radial-gradient(circle at 50% 50%,#000 0%,rgba(0,0,0,.85) 50%,rgba(0,0,0,.35) 82%,transparent 100%);
-  mix-blend-mode:screen;filter:blur(5px);animation:wh-shimmer 5s linear infinite;pointer-events:none}
+  mix-blend-mode:screen;filter:blur(2px);animation:wh-shimmer 5s linear infinite;pointer-events:none}
 @keyframes wh-shimmer{to{transform:rotate(360deg)}}
 .wh-core::after{content:'';position:absolute;top:5%;left:50%;width:48%;height:16%;border-radius:50%;
-  background:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,1) 0%,rgba(255,252,230,.9) 18%,rgba(255,240,200,.5) 42%,transparent 75%);
-  filter:blur(2px);pointer-events:none;transform-origin:50% 260%;
+  background:radial-gradient(ellipse at 50% 40%,rgba(255,255,255,1) 0%,rgba(242,250,255,.92) 14%,rgba(215,236,255,.52) 38%,transparent 72%);
+  filter:blur(1.5px);pointer-events:none;transform-origin:50% 260%;
   animation:wh-hl 5s ease-in-out infinite alternate}
 @keyframes wh-hl{from{transform:translateX(-50%) rotate(-28deg)}to{transform:translateX(-50%) rotate(28deg)}}
-.wh-stage[data-state="transferring"] .wh-core{animation:wh-breath 1.0s ease-in-out infinite,wh-flow 1.55s ease-in-out infinite,wh-wobble 1.4s ease-in-out infinite,wh-cspin 7.5s linear infinite}
+.wh-stage[data-state="transferring"] .wh-core{animation:wh-breath .7s ease-in-out infinite,wh-flow .95s ease-in-out infinite,wh-wobble 1.0s ease-in-out infinite,wh-cspin 3s linear infinite}
 .wh-stage[data-state="transferring"] .wh-core::before{animation-duration:2.4s}
 .wh-stage[data-state="bursting"] .wh-core{animation:wh-burst .5s cubic-bezier(.4,0,.8,1) forwards;opacity:1;
   -webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,#000 58%,rgba(0,0,0,.85) 72%,rgba(0,0,0,.5) 84%,rgba(0,0,0,.2) 93%,transparent 100%);
@@ -217,6 +234,33 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 @keyframes wh-ripple{0%{opacity:0;transform:scale(.05);border-width:8px}20%{opacity:1;transform:scale(.4);border-width:6px}100%{opacity:0;transform:scale(1.6);border-width:1px}}
 .wh-rp2{border-color:rgba(255,240,160,.85);box-shadow:0 0 36px rgba(255,220,130,.55);animation-delay:.75s !important}
 .wh-rp3{border-color:rgba(255,255,255,.7);box-shadow:0 0 28px rgba(255,240,200,.4);animation-delay:.95s !important}
+/* Drag-hover: immediately spins at transfer speed so the portal feels alive */
+.wh-stage.drag-active .wh-r0{animation-duration:8s}
+.wh-stage.drag-active .wh-r1{animation-duration:4.5s}
+.wh-stage.drag-active .wh-r2{animation-duration:3.2s}
+.wh-stage.drag-active .wh-r3{animation-duration:2.2s}
+.wh-stage.drag-active .wh-r4{animation-duration:1.6s}
+.wh-stage.drag-active .wh-r5{animation-duration:1.0s}
+.wh-stage.drag-active .wh-r6{animation-duration:0.6s}
+.wh-stage.drag-active .wh-core{animation:wh-breath .7s ease-in-out infinite,wh-flow 1.1s ease-in-out infinite,wh-wobble 1.0s ease-in-out infinite,wh-cspin 2.5s linear infinite}
+/* Completion surge: wormhole exhales energy outward, rings blur to vortex */
+.wh-stage.completing{animation:wh-surge 1.15s cubic-bezier(.15,.85,.22,1)}
+@keyframes wh-surge{
+  0%  {transform:scale(1)}
+  20% {transform:scale(1.18)}
+  52% {transform:scale(1.11)}
+  80% {transform:scale(1.03)}
+  100%{transform:scale(1)}
+}
+.wh-stage.completing .wh-r0{animation-duration:.55s}
+.wh-stage.completing .wh-r1{animation-duration:.32s}
+.wh-stage.completing .wh-r2{animation-duration:.22s}
+.wh-stage.completing .wh-r3{animation-duration:.16s}
+.wh-stage.completing .wh-r4{animation-duration:.11s}
+.wh-stage.completing .wh-r5{animation-duration:.075s}
+.wh-stage.completing .wh-r6{animation-duration:.05s}
+.wh-stage.completing .wh-core{animation:wh-breath .22s ease-in-out infinite,wh-flow .44s ease-in-out infinite,wh-wobble .32s ease-in-out infinite,wh-cspin .65s linear infinite;filter:brightness(2.8) contrast(1.2) saturate(0.45)!important}
+/* Keep shake only for error state */
 .wh-stage.shaking{animation:wh-shake .42s cubic-bezier(.36,.07,.19,.97)}
 @keyframes wh-shake{0%{transform:translate(0,0)}15%{transform:translate(-5px,2px)}30%{transform:translate(4px,-4px)}45%{transform:translate(-3px,4px)}60%{transform:translate(3px,-2px)}75%{transform:translate(-2px,2px)}100%{transform:translate(0,0)}}
 .wh-stage[data-state="error"] .wh-core{filter:brightness(.7) saturate(1.4) hue-rotate(-30deg)}
@@ -224,7 +268,7 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 #wh-arcs path{fill:none;stroke:#fff8d0;stroke-width:1.4;stroke-linecap:round;opacity:.95}
 #wh-arcs path.fade{opacity:0;transition:opacity .18s ease-out}
 @keyframes wh-arc{from{stroke-dashoffset:var(--arc-len)}to{stroke-dashoffset:0}}
-.wh-label{font-size:10px;font-weight:600;color:var(--beam2);text-align:center;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+.wh-label{font-size:10px;font-weight:700;color:var(--beam2);text-align:center;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;text-shadow:0 0 12px rgba(245,192,80,.5);opacity:.85}
 
 /* ── PROGRESS ── */
 .progress-overlay{
@@ -411,6 +455,7 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
         <div class="xfer-middle">
           <div class="wh-stage" id="whStage" data-state="idle">
             <div class="wh-halo"></div>
+            <canvas class="wh-particles" id="whParticles"></canvas>
             <svg class="wh-rings" viewBox="0 0 600 600">
               <defs>
                 <radialGradient id="whAtmo" cx="50%" cy="50%" r="50%">
@@ -474,7 +519,6 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
                 <circle cx="300" cy="300" r="108" fill="none" stroke="#ffb800" stroke-width=".6" opacity=".45"/>
               </g>
             </svg>
-            <canvas class="wh-particles" id="whParticles"></canvas>
             <div class="wh-core-wrap"><div class="wh-core" id="whCore"></div></div>
             <div class="wh-ripple"        id="whRp1"></div>
             <div class="wh-ripple wh-rp2" id="whRp2"></div>
@@ -904,7 +948,7 @@ window.IBWormhole = (function(){
   function tick(now){
     const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
     ctx.globalCompositeOperation='source-over';
-    ctx.fillStyle='rgba(5,3,8,'+(state==='idle'?'0.18':'0.12')+')';
+    ctx.fillStyle='rgba(5,3,8,'+(state==='idle'?'0.09':'0.06')+')';
     ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.globalCompositeOperation='lighter';
     if(state==='transferring'||state==='bursting'){
@@ -912,15 +956,17 @@ window.IBWormhole = (function(){
       sparkAcc+=dt*spawn;
       while(sparkAcc>=1&&sparks.length<MAX_S){sparks.push(spawnSpark());sparkAcc-=1;}
     } else sparkAcc=0;
+    ctx.shadowBlur=0;
     for(let i=sparks.length-1;i>=0;i--){
       const s=sparks[i]; s.life+=dt;
       const u=s.life/s.lifeMax;
       if(u>=1){sparks.splice(i,1);continue;}
       const sz=s.baseSize*(1+u*5), a=(1-u)*(1-u);
       const x=s.cx+Math.cos(s.angle)*s.radius, y=s.cy+Math.sin(s.angle)*s.radius;
-      ctx.beginPath(); ctx.fillStyle='rgba(255,248,208,'+a+')';
-      ctx.shadowColor='rgba(255,220,130,1)'; ctx.shadowBlur=12+u*16;
-      ctx.arc(x,y,sz,0,Math.PI*2); ctx.fill();
+      // Concentric circles → circular glow without square shadowBlur artifacts
+      ctx.beginPath(); ctx.fillStyle='rgba(255,195,70,'+(a*0.15)+')';  ctx.arc(x,y,sz*5.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.fillStyle='rgba(255,228,140,'+(a*0.35)+')'; ctx.arc(x,y,sz*2.8,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.fillStyle='rgba(255,250,210,'+a+')';         ctx.arc(x,y,sz,   0,Math.PI*2); ctx.fill();
     }
     if(state!=='idle'||particles.length<20){
       while(particles.length<MAX_P) particles.push(spawnP());
@@ -936,10 +982,9 @@ window.IBWormhole = (function(){
       const a=Math.min(1,(0.4+t*0.9)*p.brightness)*(state==='idle'?0.35:1);
       const sz=p.size*(1+t*1.4);
       const x=p.cx+Math.cos(p.angle)*p.radius, y=p.cy+Math.sin(p.angle)*p.radius;
-      ctx.beginPath(); ctx.fillStyle='rgba('+r+','+g+','+b+','+a+')';
-      ctx.shadowColor='rgba('+r+','+g+','+b+',0.9)';
-      ctx.shadowBlur=(8+t*12)*(p.isHead?1.6:1);
-      ctx.arc(x,y,sz,0,Math.PI*2); ctx.fill();
+      // Glow halo then bright core — circular, no square shadow artifacts
+      ctx.beginPath(); ctx.fillStyle='rgba('+r+','+g+','+b+','+(a*0.20)+')'; ctx.arc(x,y,sz*3.8,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.fillStyle='rgba('+r+','+g+','+b+','+a+')';         ctx.arc(x,y,sz,   0,Math.PI*2); ctx.fill();
       if(p.radius<p.minR*0.85){
         if(state==='idle') particles.splice(i,1);
         else particles[i]=spawnP();
@@ -989,10 +1034,10 @@ window.IBWormhole = (function(){
     bursting=true; setState('bursting'); progress=1;
     spawnLightning();
     setTimeout(()=>{
-      if(stage){stage.classList.remove('shaking');void stage.offsetWidth;stage.classList.add('shaking');}
+      if(stage){stage.classList.remove('completing');void stage.offsetWidth;stage.classList.add('completing');}
       if(flash){flash.classList.remove('fire');void flash.offsetWidth;flash.classList.add('fire');}
       ripples.forEach(r=>{if(r){r.classList.remove('fire');void r.offsetWidth;r.classList.add('fire');}});
-      setTimeout(()=>stage&&stage.classList.remove('shaking'),450);
+      setTimeout(()=>stage&&stage.classList.remove('completing'),1150);
     },580);
     setTimeout(()=>{if(label) label.textContent='✦ Complete';},1500);
     setTimeout(()=>{_idle();bursting=false;},2800);
