@@ -71,9 +71,8 @@ function createWindow() {
     },
   });
 
-  const rendererPath = app.isPackaged
-    ? path.join(process.resourcesPath, 'src', 'renderer', 'app', 'index.html')
-    : path.join(__dirname, '../renderer/app/index.html');
+  // __dirname resolves correctly both in dev (src/main) and packaged (app.asar/src/main)
+  const rendererPath = path.join(__dirname, '../renderer/app/index.html');
   mainWindow.loadFile(rendererPath);
 
   mainWindow.once('ready-to-show', () => {
