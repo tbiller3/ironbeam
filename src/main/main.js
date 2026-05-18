@@ -148,7 +148,19 @@ ipcMain.handle('list-files', () => {
 ipcMain.handle('open-file',           (_, n) => shell.openPath(path.join(TRANSFER_DIR, n)));
 ipcMain.handle('open-transfer-folder',()     => shell.openPath(TRANSFER_DIR));
 ipcMain.handle('open-folder',         ()     => shell.openPath(TRANSFER_DIR)); // legacy alias
-ipcMain.handle('delete-file', (_, n) => { try { fs.unlinkSync(path.join(TRANSFER_DIR, n)); return true; } catch { return false; } });
+ipcMain.handle('delete-file', (_, n) => { try { fs.unlinkSync(path.join(TRANSFER_DIR, n)); return true; } catch { return false; } })
+ipcMain.handle('push-to-phone', (_, name) => serverCore?.pushFileToPhone(name) ?? 0);
+ipcMain.handle('copy-file', async (_, sourcePath) => {
+  try {
+    const name = path.basename(sourcePath);
+    const base = path.basename(name, path.extname(name));
+    const ext  = path.extname(name);
+    let dest = path.join(TRANSFER_DIR, name);
+    if (fs.existsSync(dest)) dest = path.join(TRANSFER_DIR, `${base}_${Date.now()}${ext}`);
+    fs.copyFileSync(sourcePath, dest);
+    return path.basename(dest);
+  } catch { return null; }
+});;
 ipcMain.handle('get-mobileconfig', () => {
   const p = path.join(TRANSFER_DIR, 'IRONBEAM-Trust.mobileconfig');
   return fs.existsSync(p) ? p : null;

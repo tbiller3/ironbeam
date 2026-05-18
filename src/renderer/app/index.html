@@ -88,10 +88,16 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 .file-card{
   display:flex;align-items:center;gap:10px;padding:9px 10px;
   border-radius:var(--rs);border:1px solid transparent;
-  cursor:pointer;transition:all .15s;margin-bottom:2px;
+  cursor:grab;transition:all .15s;margin-bottom:2px;
+  user-select:none;-webkit-user-select:none;
 }
 .file-card:hover{background:var(--bg3);border-color:var(--b2)}
+.file-card:active{cursor:grabbing}
+.file-card.dragging{opacity:.4;border-color:var(--b1);background:var(--bg3)}
 .file-card.new{animation:arrive .35s cubic-bezier(.34,1.56,.64,1)}
+/* Wormhole drag-over highlight */
+.wh-stage.drag-active{filter:drop-shadow(0 0 18px rgba(255,184,0,.7))}
+.wh-stage.drag-active .wh-core{opacity:1;filter:brightness(2) saturate(1.4)}
 @keyframes arrive{0%{transform:scale(.8) translateY(8px);opacity:0}100%{transform:scale(1);opacity:1}}
 .fc-icon{width:34px;height:34px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .fc-meta{flex:1;min-width:0}
@@ -734,6 +740,14 @@ function renderDesktopFiles(newFileName) {
         <button class="fc-btn del" title="Delete" onclick="deleteFile('${esc(f.name)}')">✕</button>
       </div>`;
     card.addEventListener('click', e => { if (!e.target.closest('.fc-actions')) openFile(f.name); });
+    // Drag to wormhole
+    card.draggable = true;
+    card.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('ib-filename', f.name);
+      e.dataTransfer.effectAllowed = 'copy';
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
     container.appendChild(card);
   });
 }
@@ -994,6 +1008,93 @@ window.IBWormhole = (function(){
 
   document.addEventListener('DOMContentLoaded',()=>{init();});
   return {open, progress:pct, complete, idle:_idle};
+})();
+
+// ── Wormhole drop target (drag desktop file or external file → iPhone) ────────
+(function(){
+  function wormholeTransfer(name) {
+    IBWormhole.open(name);
+    let p = 0;
+    const ramp = setInterval(() => {
+      p = Math.min(1, p + 0.08);
+      IBWormhole.progress(p);
+      if (p >= 1) {
+        clearInterval(ramp);
+        IBWormhole.complete('Sent to iPhone ✓');
+      }
+    }, 35);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const stage = document.getElementById('whStage');
+    if (!stage) return;
+
+    stage.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      stage.classList.add('drag-active');
+      stage.dataset.state = 'transferring';
+    });
+
+    stage.addEventListener('dragleave', e => {
+      // Only fire when leaving the stage itself (not a child element)
+      if (!stage.contains(e.relatedTarget)) {
+        stage.classList.remove('drag-active');
+        stage.dataset.state = 'idle';
+      }
+    });
+
+    stage.addEventListener('drop', async e => {
+      e.preventDefault();
+      stage.classList.remove('drag-active');
+
+      // ── Case 1: file dragged from our desktop file list ──────────────────
+      const ibName = e.dataTransfer.getData('ib-filename');
+      if (ibName) {
+        wormholeTransfer(ibName);
+        if (IB_IS_ELECTRON) {
+          const sent = await IB.pushToPhone(ibName);
+          showToast(sent > 0
+            ? `📱 "${ibName}" pushed to iPhone`
+            : `📁 "${ibName}" ready — open Receive tab on iPhone`, 'ok');
+        } else {
+          showToast(`📱 "${ibName}" sent to iPhone`, 'ok');
+        }
+        return;
+      }
+
+      // ── Case 2: external file dragged from Windows Explorer ──────────────
+      const extFiles = e.dataTransfer.files;
+      if (extFiles && extFiles.length > 0) {
+        for (const file of extFiles) {
+          const srcPath = file.path; // Electron exposes this on File objects
+          if (!srcPath) continue;
+          let name = file.name;
+          if (IB_IS_ELECTRON) {
+            const copied = await IB.copyFile(srcPath);
+            if (copied) {
+              name = copied;
+              await refreshDesktopFiles(name);
+              const sent = await IB.pushToPhone(name);
+              wormholeTransfer(name);
+              showToast(sent > 0
+                ? `📱 "${name}" copied & pushed to iPhone`
+                : `📁 "${name}" copied — open Receive tab on iPhone`, 'ok');
+            } else {
+              showToast(`Could not copy "${file.name}"`, 'err');
+            }
+          } else {
+            wormholeTransfer(name);
+            showToast(`📱 "${name}" sent`, 'ok');
+          }
+        }
+        return;
+      }
+
+      // Nothing useful dropped
+      stage.dataset.state = 'idle';
+    });
+  });
 })();
 </script>
 </body>

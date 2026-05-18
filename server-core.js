@@ -210,4 +210,17 @@ function onPhoneConnected(cb)  { _phoneConnectedCbs.push(cb); }
 function onPhoneDisconnected(cb) { _phoneDisconnCbs.push(cb); }
 function fmt(b) { if(b<1024)return b+' B'; if(b<1048576)return Math.round(b/1024)+' KB'; return(b/1048576).toFixed(1)+' MB'; }
 
-module.exports = { start, stop, isConnected, onFileReceived, onPhoneConnected, onPhoneDisconnected };
+/** Push a "file ready to download" notification to all connected phone clients. */
+function pushFileToPhone(name) {
+  let sent = 0;
+  _wss?.clients.forEach(c => {
+    if (c.readyState === 1) {
+      c.send(JSON.stringify({ event: 'file-push', name }));
+      sent++;
+    }
+  });
+  console.log(`[IRONBEAM] Pushed "${name}" to ${sent} phone client(s)`);
+  return sent;
+}
+
+module.exports = { start, stop, isConnected, onFileReceived, onPhoneConnected, onPhoneDisconnected, pushFileToPhone };
