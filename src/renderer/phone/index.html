@@ -316,13 +316,22 @@ async function upload(file){
       xs.textContent=fmt(sp)+'/s · '+fmt(e.loaded)+' of '+fmt(e.total);
     };
     xhr.onload=()=>{
-      xf.style.width='100%';xp.textContent='100%';
-      xs.textContent='Done in '+((Date.now()-t0)/1000).toFixed(1)+'s';
-      addH('↑',file.name,file.size);
-      toast('Sent: '+file.name,'ok');
-      setTimeout(()=>xc.classList.remove('show'),2000);res();
+      if(xhr.status>=200&&xhr.status<300){
+        xf.style.width='100%';xp.textContent='100%';
+        xs.textContent='Done in '+((Date.now()-t0)/1000).toFixed(1)+'s';
+        addH('↑',file.name,file.size);
+        toast('Sent: '+file.name,'ok');
+        setTimeout(()=>xc.classList.remove('show'),2000);
+      }else{
+        xs.textContent='Server error '+xhr.status;
+        toast('Failed: '+file.name+' ('+xhr.status+')','err');
+        setTimeout(()=>xc.classList.remove('show'),2500);
+      }
+      res();
     };
+    xhr.ontimeout=()=>{toast('Timed out: '+file.name,'err');xc.classList.remove('show');res();};
     xhr.onerror=()=>{toast('Failed: '+file.name,'err');xc.classList.remove('show');res();};
+    xhr.timeout=180000;
     xhr.open('POST',S.base+'/upload');xhr.send(form);
   });
 }

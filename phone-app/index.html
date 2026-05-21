@@ -71,6 +71,22 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
 .uzi{font-size:34px;margin-bottom:8px}
 .uzt{font-size:16px;font-weight:700;color:var(--beam2);margin-bottom:4px}
 .uzs{font-size:13px;color:var(--steel2);line-height:1.5}
+/* Send portal (wormhole) */
+.portal-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 16px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.send-portal{position:relative;width:160px;height:160px;display:grid;place-items:center;transition:transform .15s}
+.portal-wrap:active .send-portal{transform:scale(.96)}
+.send-portal>*{position:absolute;inset:0;width:100%;height:100%}
+.sp-halo{background:radial-gradient(circle at 50%,rgba(255,184,0,.28) 0%,rgba(255,120,0,.12) 38%,transparent 65%);filter:blur(10px);animation:sp-halo 4s ease-in-out infinite}
+.sp-rings{overflow:visible}.sp-ring{transform-origin:300px 300px;transform-box:view-box}
+.sp-r1{animation:sp-spin 55s linear infinite}.sp-r2{animation:sp-rspin 38s linear infinite}.sp-r3{animation:sp-spin 26s linear infinite}.sp-r4{animation:sp-rspin 17s linear infinite}.sp-r5{animation:sp-spin 11s linear infinite}
+.sp-core-wrap{display:grid;place-items:center;pointer-events:none}
+.sp-core{width:36%;height:36%;border-radius:50%;background-color:#020408;background-image:radial-gradient(ellipse 7% 5% at 30% 22%,rgba(255,255,255,1) 0%,rgba(255,255,255,.8) 20%,transparent 54%),radial-gradient(ellipse 52% 38% at 27% 24%,rgba(255,255,255,1) 0%,rgba(245,252,255,.86) 13%,rgba(200,225,252,.36) 34%,transparent 68%),radial-gradient(ellipse 44% 32% at 75% 78%,rgba(255,255,255,.95) 0%,rgba(225,244,255,.5) 22%,transparent 62%),radial-gradient(ellipse 58% 46% at 52% 56%,rgba(1,2,6,.72) 0%,rgba(1,2,6,.18) 52%,transparent 72%),conic-gradient(from 55deg at 50% 50%,#020408 0%,#0e1220 6%,#242c3e 12%,#4a5468 18%,#8892a4 24%,#bec8d4 29%,#dce6f0 33%,#f4f8fc 37%,#fafcff 40%,#ecf2f8 43%,#ccd4e0 47%,#8a94a6 52%,#424e60 58%,#181e2c 64%,#060a12 70%,#0c1020 76%,#202838 82%,#404e62 88%,#161c28 94%,#020408 100%);background-size:108% 108%,152% 152%,152% 152%,158% 158%,118% 118%;background-position:30% 22%,16% 24%,75% 78%,52% 56%,50% 50%;background-repeat:no-repeat;box-shadow:0 0 40px rgba(255,184,0,.45),0 0 90px rgba(255,120,0,.2),inset 0 0 12px rgba(255,255,255,.6);filter:brightness(1.6) contrast(1.45) saturate(.52);animation:sp-breath 3.2s ease-in-out infinite,sp-cspin 10s linear infinite}
+.sp-label{font-size:16px;font-weight:700;color:var(--beam2);margin-top:12px;letter-spacing:.04em}
+.sp-sub{font-size:12px;color:var(--steel2);margin-top:3px}
+@keyframes sp-halo{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+@keyframes sp-spin{to{transform:rotate(360deg)}}@keyframes sp-rspin{to{transform:rotate(-360deg)}}
+@keyframes sp-breath{0%,100%{transform:scale(1);filter:brightness(1.6) contrast(1.45) saturate(.52)}50%{transform:scale(1.06);filter:brightness(1.9) contrast(1.45) saturate(.52)}}
+@keyframes sp-cspin{to{rotate:360deg}}
 
 /* Transfer progress */
 .xc{background:rgba(232,160,32,.08);border:1px solid var(--b1);border-radius:12px;padding:14px;display:none}
@@ -91,6 +107,13 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
 .fn{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
 .fo{font-size:11px;color:var(--steel2)}
 .fa{font-size:20px;color:var(--beam);flex-shrink:0}
+.fa-btns{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.fr-share{background:none;border:none;color:var(--steel3);cursor:pointer;padding:4px 6px;display:flex;align-items:center;transition:color .15s}
+.fr-share:active{color:var(--beam)}
+.h-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.h-right .hc{margin-left:0}
+.h-share{background:none;border:1px solid var(--b2);border-radius:20px;padding:5px 10px;color:var(--beam2);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;font-family:inherit}
+.h-share:active{background:var(--bg3)}
 
 /* Stats */
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -102,7 +125,35 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
 .row{display:flex;align-items:center;justify-content:space-between;padding:14px;border-bottom:1px solid var(--b2)}
 .row:last-child{border-bottom:none}
 .rl{font-size:14px;font-weight:500}
+.rl-sub{display:block;font-size:11px;color:var(--steel3);font-weight:400;margin-top:2px}
 .rv{font-size:13px;color:var(--steel2);text-align:right;max-width:200px;word-break:break-all}
+/* Toggle switch */
+.tog{position:relative;width:44px;height:26px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.tog-sl{position:absolute;inset:0;cursor:pointer;background:var(--b2);border-radius:26px;transition:all .2s}
+.tog-sl::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:var(--steel3);border-radius:50%;transition:all .2s}
+.tog input:checked + .tog-sl{background:var(--beam)}
+.tog input:checked + .tog-sl::before{transform:translateX(18px);background:#fff}
+
+/* Light mode variables */
+body.ib-light{
+  --bg:#f4f4f8;--bg2:#ffffff;--bg3:#ebebf2;
+  --beam:#c07010;--beam2:#a05c08;
+  --steel:#18181e;--steel2:rgba(24,24,30,.65);--steel3:rgba(24,24,30,.38);
+  --b1:rgba(160,92,8,.22);--b2:rgba(24,24,30,.1);
+  --green:#158a60;--red:#c43030;
+}
+body.ib-light .hd,body.ib-light .tabs,body.ib-light .bb{background:var(--bg2);border-color:var(--b2)}
+body.ib-light .tab.active{color:var(--beam2);border-bottom-color:var(--beam)}
+body.ib-light .dot.on{background:var(--green);box-shadow:0 0 5px var(--green)}
+body.ib-light .screen{background:var(--bg)}
+body.ib-light .toast{background:var(--bg2);color:var(--steel)}
+body.ib-light .ii{background:var(--bg2);color:var(--steel);border-color:var(--b2)}
+body.ib-light .ii::placeholder{color:var(--steel3)}
+body.ib-light .cb{background:var(--beam);color:#fff}
+body.ib-light .sb2{background:var(--bg2)}
+body.ib-light .bbp{background:var(--beam);color:#fff}
+body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
 
 /* Bottom bar */
 .bb{position:fixed;bottom:0;left:0;right:0;padding:10px 16px;padding-bottom:calc(10px + var(--sb));background:var(--bg2);border-top:1px solid var(--b2);display:flex;gap:8px;z-index:50}
@@ -137,18 +188,18 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
   </div>
   <div class="cc">
     <h2>Connect to Desktop</h2>
-    <p>Enter your laptop IP shown in the IRONBEAM server window on your HP laptop</p>
+    <p>Enter the IP address shown in the IRONBEAM window on your desktop computer.</p>
     <label class="fl">Desktop IP Address</label>
     <div class="ir">
-      <input class="ii" type="text" id="ipInput" placeholder="10.0.0.21"
+      <input class="ii" type="text" id="ipInput" placeholder="e.g. 192.168.1.100"
         inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <button class="cb" id="connBtn" onclick="connect()">Connect</button>
     </div>
     <div class="ch">Same Wi-Fi network required · Port 7878</div>
     <div class="steps">
-      <div class="sr"><div class="sn">1</div><div class="st">IRONBEAM server must be running on your HP laptop</div></div>
-      <div class="sr"><div class="sn">2</div><div class="st">iPhone and laptop on the <strong style="color:var(--beam2)">same Wi-Fi</strong></div></div>
-      <div class="sr"><div class="sn">3</div><div class="st">Enter the IP shown in the server window: <strong style="color:var(--beam2)">10.0.0.21</strong></div></div>
+      <div class="sr"><div class="sn">1</div><div class="st">Open IRONBEAM on your desktop — the IP address is shown in the title bar</div></div>
+      <div class="sr"><div class="sn">2</div><div class="st">Make sure your iPhone and desktop are on the <strong style="color:var(--beam2)">same Wi-Fi network</strong></div></div>
+      <div class="sr"><div class="sn">3</div><div class="st">Enter the IP address above and tap Connect</div></div>
     </div>
   </div>
 </div>
@@ -160,7 +211,10 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
   <div class="hd">
     <div class="hl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12 L12 3 L20 12 L12 21 Z" stroke="#e8a020" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="#e8a020"/></svg></div>
     <span class="ht">IRONBEAM</span>
-    <div class="hc"><div class="dot on" id="dot"></div><span class="dlb" id="dlb">Connected</span></div>
+    <div class="h-right">
+      <button class="h-share" onclick="shareApp()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
+      <div class="hc"><div class="dot on" id="dot"></div><span class="dlb" id="dlb">Connected</span></div>
+    </div>
   </div>
   <div class="tabs">
     <div class="tab active" data-tab="send"><span class="ti">↑</span>Send</div>
@@ -174,10 +228,22 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
       <!-- SEND -->
       <div class="panel active" id="panel-send">
         <div class="xc" id="xc"><div class="xt"><span class="xn" id="xn">Sending...</span><span class="xp" id="xp">0%</span></div><div class="xb"><div class="xf" id="xf"></div></div><div class="xs" id="xs">Starting...</div></div>
-        <div class="uz" onclick="document.getElementById('af').click()">
-          <div class="uzi">📤</div>
-          <div class="uzt">Tap to send files</div>
-          <div class="uzs">Choose any file from your iPhone<br/>to send to your laptop</div>
+        <div class="portal-wrap" onclick="document.getElementById('af').click()">
+          <div class="send-portal">
+            <div class="sp-halo"></div>
+            <svg class="sp-rings" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+              <defs><radialGradient id="spAtmo" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#ffe8a0" stop-opacity="0"/><stop offset="55%" stop-color="#ff8800" stop-opacity=".12"/><stop offset="100%" stop-color="#000" stop-opacity="0"/></radialGradient></defs>
+              <circle cx="300" cy="300" r="285" fill="url(#spAtmo)"/>
+              <g class="sp-ring sp-r1"><circle cx="300" cy="300" r="268" fill="none" stroke="#ff9a30" stroke-width="3" opacity=".35" stroke-dasharray="50 35 90 40 60 30"/><circle cx="300" cy="300" r="262" fill="none" stroke="#ffd070" stroke-width="1.2" opacity=".5" stroke-dasharray="120 60 200 50"/></g>
+              <g class="sp-ring sp-r2"><circle cx="300" cy="300" r="232" fill="none" stroke="#ffd866" stroke-width="2" opacity=".5" stroke-dasharray="140 60 80 40 110 50"/></g>
+              <g class="sp-ring sp-r3"><circle cx="300" cy="300" r="200" fill="none" stroke="#ffb800" stroke-width=".8" opacity=".4" stroke-dasharray="30 15 60 20"/></g>
+              <g class="sp-ring sp-r4"><circle cx="300" cy="300" r="170" fill="none" stroke="#ffb800" stroke-width="1.2" opacity=".55" stroke-dasharray="3 9 18 6 8 4"/></g>
+              <g class="sp-ring sp-r5"><circle cx="300" cy="300" r="138" fill="none" stroke="#ffd866" stroke-width="1.6" opacity=".7" stroke-dasharray="40 20 70 25 30 15"/><circle cx="300" cy="300" r="112" fill="none" stroke="#fff4cc" stroke-width="1.4" opacity=".8" stroke-dasharray="2 10 20 8"/></g>
+            </svg>
+            <div class="sp-core-wrap"><div class="sp-core"></div></div>
+          </div>
+          <div class="sp-label">Tap to send</div>
+          <div class="sp-sub">Photos · Videos · Documents · Any file</div>
         </div>
         <div class="card" style="margin-top:4px">
           <div class="ct">Quick Send</div>
@@ -209,6 +275,19 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
           <div class="row"><span class="rl">Port</span><span class="rv">7443</span></div>
         </div>
         <div class="card">
+          <div class="ct">Appearance</div>
+          <div class="row">
+            <span class="rl">
+              Light Mode
+              <span class="rl-sub">Switch between dark and light theme</span>
+            </span>
+            <label class="tog">
+              <input type="checkbox" id="lightToggle" onchange="setLightMode(this.checked)"/>
+              <span class="tog-sl"></span>
+            </label>
+          </div>
+        </div>
+        <div class="card">
           <div class="ct">About</div>
           <div class="row"><span class="rl">App</span><span class="rv">IRONBEAM v1.3</span></div>
           <div class="row"><span class="rl">Protocol</span><span class="rv">UTP/1.0</span></div>
@@ -234,7 +313,19 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
 <script>
 const S={ip:'',base:'',ws:null,q:[],busy:false,hist:JSON.parse(localStorage.getItem('ib_h')||'[]')};
 
+function setLightMode(on){
+  document.body.classList.toggle('ib-light',on);
+  localStorage.setItem('ib_light',on?'1':'0');
+  const t=document.getElementById('lightToggle');
+  if(t)t.checked=on;
+  // Update theme-color meta so browser chrome matches
+  const m=document.querySelector('meta[name="theme-color"]');
+  if(m)m.setAttribute('content',on?'#ffffff':'#08080f');
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
+  // Restore light mode preference
+  if(localStorage.getItem('ib_light')==='1')setLightMode(true);
   tick();setInterval(tick,15000);
   document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
@@ -294,21 +385,31 @@ function openWS(){
     S.ws=new WebSocket(p.ws+'://'+S.ip+':'+p.port);
     S.ws.onclose=()=>{if(S.base)setTimeout(openWS,3000);};
     S.ws.onerror=()=>{};
-    S.ws.onmessage=e=>{
+    S.ws.onopen=()=>{ sendPhoneFileList(); };
+    S.ws.onmessage=(e)=>{
       try{
         const msg=JSON.parse(e.data);
-        if(msg.event==='file-push'){
-          // Desktop pushed a file — notify user and refresh Receive tab
-          toast('📥 '+msg.name+' — ready to download','ok');
-          if(document.querySelector('[data-tab="receive"]').classList.contains('active')) loadD();
+        if(msg.event==='file-pull-request'){
+          const file=(S.fileCache||{})[msg.name];
+          if(file){ S.q.unshift(file); renderQ(); if(!S.busy)nextUp(); }
         }
       }catch{}
     };
   }catch{}
 }
 
+function sendPhoneFileList(){
+  if(S.ws&&S.ws.readyState===1){
+    const files=Object.values(S.fileCache||{}).map(f=>({name:f.name,size:f.size}));
+    S.ws.send(JSON.stringify({event:'phone-file-list',files}));
+  }
+}
+
 function gotFiles(files){
   if(!files.length)return;
+  S.fileCache=S.fileCache||{};
+  files.forEach(f=>{ S.fileCache[f.name]=f; });
+  sendPhoneFileList();
   S.q.push(...files);
   renderQ();
   if(!S.busy)nextUp();
@@ -340,13 +441,22 @@ async function upload(file){
       xs.textContent=fmt(sp)+'/s · '+fmt(e.loaded)+' of '+fmt(e.total);
     };
     xhr.onload=()=>{
-      xf.style.width='100%';xp.textContent='100%';
-      xs.textContent='Done in '+((Date.now()-t0)/1000).toFixed(1)+'s';
-      addH('↑',file.name,file.size);
-      toast('Sent: '+file.name,'ok');
-      setTimeout(()=>xc.classList.remove('show'),2000);res();
+      if(xhr.status>=200&&xhr.status<300){
+        xf.style.width='100%';xp.textContent='100%';
+        xs.textContent='Done in '+((Date.now()-t0)/1000).toFixed(1)+'s';
+        addH('↑',file.name,file.size);
+        toast('Sent: '+file.name,'ok');
+        setTimeout(()=>xc.classList.remove('show'),2000);
+      }else{
+        xs.textContent='Server error '+xhr.status;
+        toast('Failed: '+file.name+' ('+xhr.status+')','err');
+        setTimeout(()=>xc.classList.remove('show'),2500);
+      }
+      res();
     };
+    xhr.ontimeout=()=>{toast('Timed out: '+file.name,'err');xc.classList.remove('show');res();};
     xhr.onerror=()=>{toast('Failed: '+file.name,'err');xc.classList.remove('show');res();};
+    xhr.timeout=180000;
     xhr.open('POST',S.base+'/upload');xhr.send(form);
   });
 }
@@ -358,11 +468,24 @@ async function loadD(){
     const r=await fetch(S.base+'/files',{signal:AbortSignal.timeout(5000)});
     const files=await r.json();
     if(!files.length){dl.innerHTML='<div style="padding:24px;text-align:center;font-size:13px;color:var(--steel3)">No files in laptop IronBeam folder</div>';return;}
-    dl.innerHTML=files.map(f=>`<div class="fr" onclick="dlF('${encodeURIComponent(f.name)}','${f.name.replace(/'/g,"\\'")}')"><div class="fi">${em(f.name)}</div><div class="fm"><div class="fn">${esc(f.name)}</div><div class="fo">${fmt(f.size)}</div></div><div class="fa">↓</div></div>`).join('');
+    dl.innerHTML=files.map(f=>`<div class="fr" onclick="dlF('${encodeURIComponent(f.name)}','${f.name.replace(/'/g,"\\'")}')"><div class="fi">${em(f.name)}</div><div class="fm"><div class="fn">${esc(f.name)}</div><div class="fo">${fmt(f.size)}</div></div><div class="fa-btns"><button class="fr-share" onclick="event.stopPropagation();shareF('${encodeURIComponent(f.name)}','${f.name.replace(/'/g,"\\'")}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button><div class="fa">↓</div></div></div>`).join('');
   }catch{dl.innerHTML='<div style="padding:20px;text-align:center;font-size:13px;color:var(--red)">Could not load — check connection</div>';}
 }
 
 function dlF(enc,name){window.open(S.base+'/files/'+enc,'_blank');addH('↓',name,0);toast('Downloading: '+name);}
+async function shareF(enc,name){
+  try{
+    await navigator.share({title:name,url:S.base+'/files/'+enc});
+  }catch(e){if(e.name!=='AbortError')toast('Share not supported on this device');}
+}
+async function shareApp(){
+  try{
+    await navigator.share({title:'IRONBEAM',text:'Transfer files wirelessly between your iPhone and desktop — no cloud, no accounts.',url:'https://ironbeam.ca'});
+  }catch(e){
+    if(e.name==='AbortError')return;
+    try{await navigator.clipboard.writeText('https://ironbeam.ca');toast('Link copied!');}catch{toast('https://ironbeam.ca');}
+  }
+}
 function goRec(){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelector('[data-tab="receive"]').classList.add('active');document.getElementById('panel-receive').classList.add('active');loadD();}
 function renderQ(){const c=document.getElementById('qc'),l=document.getElementById('ql');if(!S.q.length){c.style.display='none';return;}c.style.display='block';l.innerHTML=S.q.map(f=>`<div class="fr"><div class="fi">${em(f.name)}</div><div class="fm"><div class="fn">${esc(f.name)}</div><div class="fo">${fmt(f.size)} · queued</div></div><div class="fa" style="color:var(--steel3);font-size:14px">⏳</div></div>`).join('');}
 
