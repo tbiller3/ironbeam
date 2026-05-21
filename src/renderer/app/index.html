@@ -119,23 +119,32 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 .empty-state p{font-size:12px}
 
 /* Transfer middle column — wormhole */
-.transfer-layout{grid-template-columns:1fr 180px 1fr !important}
+.transfer-layout{grid-template-columns:1fr 220px 1fr !important}
 .xfer-middle{
-  border-left:1px solid var(--b2);border-right:1px solid var(--b2);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
-  background:linear-gradient(180deg,var(--bg) 0%,rgba(15,10,5,.6) 50%,var(--bg) 100%);
+  background:linear-gradient(180deg,var(--bg) 0%,rgba(15,10,5,.5) 50%,var(--bg) 100%);
   padding:10px 6px;
+  /* Subtle vertical separators that don't cage the animation */
+  box-shadow:inset 1px 0 0 var(--b3),inset -1px 0 0 var(--b3);
 }
 .xfer-stats{display:flex;flex-direction:column;align-items:center;gap:2px}
 .xs-val{font-size:16px;font-weight:700;color:var(--beam2);font-variant-numeric:tabular-nums;letter-spacing:-.01em;text-shadow:0 0 14px rgba(245,192,80,.3)}
 .xs-lbl{font-size:9px;color:var(--steel3);letter-spacing:.12em;text-transform:uppercase}
 
 /* ── IRONBEAM Wormhole (desktop) ── */
-.wh-stage{position:relative;width:148px;height:148px;display:grid;place-items:center}
+.wh-stage{position:relative;width:162px;height:162px;display:grid;place-items:center}
 .wh-stage > *{position:absolute;inset:0;width:100%;height:100%}
 .wh-halo{background:radial-gradient(circle at 50% 50%,rgba(255,200,60,.22) 0%,rgba(255,140,0,.13) 20%,rgba(180,80,0,.07) 42%,transparent 62%);filter:blur(8px);animation:wh-halo 4s ease-in-out infinite;pointer-events:none}
 @keyframes wh-halo{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
-.wh-particles{-webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,#000 62%,rgba(0,0,0,.75) 78%,rgba(0,0,0,.35) 90%,transparent 100%);mask:radial-gradient(circle at 50% 50%,#000 0%,#000 62%,rgba(0,0,0,.75) 78%,rgba(0,0,0,.35) 90%,transparent 100%)}
+.wh-particles{
+  /* Extend well beyond the stage so particles fade naturally — no square edge */
+  position:absolute !important;
+  inset:-60px !important;
+  width:calc(100% + 120px) !important;
+  height:calc(100% + 120px) !important;
+  -webkit-mask:radial-gradient(circle at 50% 50%,#000 0%,#000 46%,rgba(0,0,0,.8) 58%,rgba(0,0,0,.45) 70%,rgba(0,0,0,.18) 82%,transparent 92%);
+  mask:radial-gradient(circle at 50% 50%,#000 0%,#000 46%,rgba(0,0,0,.8) 58%,rgba(0,0,0,.45) 70%,rgba(0,0,0,.18) 82%,transparent 92%);
+}
 .wh-rings{overflow:visible}
 .wh-ring{transform-origin:300px 300px;transform-box:view-box}
 .wh-r1{animation:wh-spin  60s linear infinite}
@@ -269,6 +278,13 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 #wh-arcs path.fade{opacity:0;transition:opacity .18s ease-out}
 @keyframes wh-arc{from{stroke-dashoffset:var(--arc-len)}to{stroke-dashoffset:0}}
 .wh-label{font-size:10px;font-weight:700;color:var(--beam2);text-align:center;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;text-shadow:0 0 12px rgba(245,192,80,.5);opacity:.85}
+.xfer-cancel{
+  display:none;font-size:10px;padding:3px 12px;
+  background:transparent;border:1px solid rgba(226,75,74,.35);
+  border-radius:20px;color:var(--red);cursor:pointer;
+  letter-spacing:.04em;transition:all .18s;
+}
+.xfer-cancel:hover{background:var(--red2);border-color:var(--red);color:#ff6b6a}
 
 /* ── PROGRESS ── */
 .progress-overlay{
@@ -324,6 +340,8 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 .fr-btn{width:26px;height:26px;border-radius:5px;background:transparent;border:none;font-size:13px;color:var(--steel3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .fr-btn:hover{background:var(--bg4);color:var(--steel)}
 .fr-btn.del:hover{color:var(--red)}
+.fr-btn.share:hover{color:var(--beam2)}
+.toolbar-btn.share-app{border-color:var(--b1);color:var(--beam2)}
 
 /* ── SETTINGS PANEL ── */
 .settings-body{flex:1;overflow-y:auto;padding:20px 24px}
@@ -355,6 +373,122 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
   font-size:9px;font-weight:700;color:white;
   display:flex;align-items:center;justify-content:center;padding:0 4px;
 }
+
+/* ── Phone connection banner ── */
+.phone-conn-banner{
+  display:none;align-items:center;gap:8px;
+  padding:8px 10px;margin:4px 4px 4px;
+  background:var(--green2);border:1px solid rgba(29,158,117,.22);
+  border-radius:var(--rs);flex-shrink:0;
+}
+.pcb-dot{width:7px;height:7px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 6px var(--green);flex-shrink:0;animation:pulse 2s infinite}
+.pcb-text{flex:1;min-width:0}
+.pcb-label{font-size:11px;font-weight:600;color:var(--green);display:block;line-height:1.3}
+.pcb-ip{font-size:10px;color:var(--steel3);font-family:'SF Mono','Consolas',monospace}
+.pcb-hint{font-size:10px;color:var(--steel3);flex-shrink:0;white-space:nowrap}
+.phone-status-on{color:var(--green) !important;font-weight:600}
+
+/* ── PRO UPGRADE MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;
+  z-index:2000;padding:20px;backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{
+  background:var(--bg2);border:1px solid var(--b1);border-radius:18px;
+  padding:36px 32px;max-width:420px;width:100%;text-align:center;
+  box-shadow:0 0 80px rgba(232,160,32,.12),0 32px 64px rgba(0,0,0,.6);
+  transform:scale(.94) translateY(8px);transition:transform .22s cubic-bezier(.34,1.56,.64,1);
+}
+.modal-overlay.show .modal{transform:scale(1) translateY(0)}
+.modal-icon{font-size:40px;margin-bottom:12px}
+.modal-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+.modal-sub{font-size:13px;color:var(--steel2);line-height:1.65;margin-bottom:24px}
+.modal-plans{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.plan-card{
+  background:var(--bg3);border:1px solid var(--b2);border-radius:12px;
+  padding:14px;cursor:pointer;transition:all .15s;position:relative;
+}
+.plan-card:hover{border-color:var(--b1);background:var(--beam3)}
+.plan-card.featured{border-color:var(--b1);background:var(--beam3)}
+.plan-badge{position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+  background:var(--beam);color:var(--bg);font-size:9px;font-weight:700;
+  padding:2px 8px;border-radius:20px;letter-spacing:.06em;white-space:nowrap}
+.plan-price{font-size:20px;font-weight:800;color:var(--beam2);margin-bottom:2px}
+.plan-period{font-size:10px;color:var(--steel3);letter-spacing:.06em}
+.plan-save{font-size:10px;color:var(--green);margin-top:4px;font-weight:600}
+.modal-upgrade-btn{
+  width:100%;padding:14px;background:var(--beam);color:var(--bg);
+  border:none;border-radius:12px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:10px;
+}
+.modal-upgrade-btn:hover{background:var(--beam2);transform:translateY(-1px)}
+.modal-skip{font-size:12px;color:var(--steel3);cursor:pointer;background:none;border:none;font-family:inherit;padding:4px}
+.modal-skip:hover{color:var(--steel2)}
+.pro-bar{
+  background:linear-gradient(90deg,rgba(232,160,32,.08),rgba(232,160,32,.04));
+  border:1px solid var(--b1);border-radius:var(--rs);
+  padding:8px 12px;display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:6px;
+}
+.pro-bar-label{font-size:11px;color:var(--beam2);font-weight:600}
+.pro-bar-val{font-size:11px;color:var(--steel3)}
+
+/* ── LITE MODE — pause all wormhole animations ── */
+body.ib-lite .wh-halo,
+body.ib-lite .wh-ring,
+body.ib-lite .wh-beacon,
+body.ib-lite .wh-beacon-in {
+  animation-play-state:paused !important;
+}
+body.ib-lite .wh-core,
+body.ib-lite .wh-core::before,
+body.ib-lite .wh-core::after {
+  animation-play-state:paused !important;
+  filter:brightness(1.55) contrast(1.42) saturate(0.50) !important;
+}
+/* Single expanding ring that fires on each transfer in Lite Mode */
+.wh-lite-pulse {
+  position:absolute;inset:18%;border-radius:50%;
+  border:2px solid rgba(232,160,32,.8);
+  box-shadow:0 0 22px rgba(232,160,32,.45),0 0 48px rgba(232,160,32,.18);
+  opacity:0;transform:scale(0.35);pointer-events:none;
+}
+.wh-lite-pulse.fire {
+  animation:wh-lite-ring 1.3s cubic-bezier(.12,.85,.22,1) forwards;
+}
+@keyframes wh-lite-ring {
+  0%  {opacity:0;transform:scale(0.3);border-width:5px}
+  18% {opacity:1;transform:scale(0.65);border-width:3px}
+  60% {opacity:.65;transform:scale(1.05);border-width:2px}
+  100%{opacity:0;transform:scale(1.7);border-width:1px}
+}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-switch{position:relative;width:38px;height:22px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{
+  position:absolute;inset:0;cursor:pointer;
+  background:var(--bg4);border:1px solid var(--b2);
+  border-radius:22px;transition:all .2s;
+}
+.toggle-slider::before{
+  content:'';position:absolute;
+  width:15px;height:15px;left:3px;top:3px;
+  background:var(--steel3);border-radius:50%;
+  transition:all .2s;
+}
+.toggle-switch input:checked + .toggle-slider{
+  background:var(--beam3);border-color:var(--b1);
+}
+.toggle-switch input:checked + .toggle-slider::before{
+  transform:translateX(16px);background:var(--beam2);
+  box-shadow:0 0 6px rgba(245,192,80,.5);
+}
+.sr-sublabel{display:block;font-size:11px;color:var(--steel3);font-weight:400;margin-top:3px;line-height:1.45}
 </style>
 </head>
 <body>
@@ -524,8 +658,10 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
             <div class="wh-ripple wh-rp2" id="whRp2"></div>
             <div class="wh-ripple wh-rp3" id="whRp3"></div>
             <div class="wh-flash"         id="whFlash"></div>
+            <div class="wh-lite-pulse"   id="whLitePulse"></div>
           </div>
           <div class="wh-label" id="whLabel">IRONBEAM</div>
+          <button class="xfer-cancel" id="xferCancel" onclick="cancelTransfer()">✕ Cancel</button>
           <div class="xfer-stats" style="margin-top:4px">
             <div class="xs-val" id="xferCount">0</div>
             <div class="xs-lbl">transfers</div>
@@ -539,12 +675,22 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
         <div class="transfer-side">
           <div class="ts-head">
             <span class="ts-label">📱 iPhone</span>
-            <span style="font-size:10px;color:var(--steel3)" id="phoneConnStatus">Not connected</span>
+            <span id="phoneConnStatus" style="font-size:10px;color:var(--steel3)">Not connected</span>
           </div>
-          <div class="file-scroll" id="phoneFiles">
-            <div class="empty-state" id="phoneEmpty">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
-              <p>Connect your iPhone<br/>to see its files here</p>
+          <div class="file-scroll" id="phoneFiles" style="display:flex;flex-direction:column;padding:0">
+            <div class="phone-conn-banner" id="phoneConnBanner">
+              <div class="pcb-dot"></div>
+              <div class="pcb-text">
+                <span class="pcb-label">iPhone Connected</span>
+                <span class="pcb-ip" id="pcbIp"></span>
+              </div>
+              <span class="pcb-hint">Tap 📤 to send</span>
+            </div>
+            <div style="flex:1;overflow-y:auto;padding:8px" id="phoneFileInner">
+              <div class="empty-state" id="phoneEmpty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+                <p>Connect your iPhone<br/>to see its files here</p>
+              </div>
             </div>
           </div>
         </div>
@@ -570,6 +716,7 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
         <input class="search-box" type="text" id="fileSearch" placeholder="Search files..." oninput="filterFiles()"/>
         <button class="toolbar-btn" onclick="IB.openTransferFolder()">Open folder</button>
         <button class="toolbar-btn" onclick="refreshDesktopFiles()">Refresh</button>
+        <button class="toolbar-btn share-app" onclick="shareApp()">⬆ Share IRONBEAM</button>
       </div>
       <div class="files-list" id="filesList">
         <div class="empty-state">
@@ -639,6 +786,40 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
           <div class="setting-row"><span class="sr-label">Files stored</span><span class="sr-val" id="setCount">0</span></div>
         </div>
         <div class="setting-group">
+          <div class="sg-title">Pro License</div>
+          <div class="pro-bar" id="proStatusBar">
+            <span class="pro-bar-label" id="proStatusLabel">Free — 5 transfers remaining</span>
+            <span class="pro-bar-val" id="proStatusVal"></span>
+          </div>
+          <div class="setting-row" id="licenseInputRow">
+            <span class="sr-label">
+              License Key
+              <span class="sr-sublabel">Enter your BEAM-XXXX-XXXX-XXXX key</span>
+            </span>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="licenseKeyInput" type="text" placeholder="BEAM-..." style="width:200px;background:var(--bg3);border:1px solid var(--b2);border-radius:var(--rs);padding:6px 10px;font-size:11px;color:var(--steel);font-family:'SF Mono','Consolas',monospace"/>
+              <button class="copy-btn" onclick="activateLicense()" style="white-space:nowrap">Activate</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <span class="sr-label">Upgrade to Pro</span>
+            <button class="copy-btn" onclick="showUpgradeModal()" style="border-color:var(--b1);color:var(--beam2)">View Plans</button>
+          </div>
+        </div>
+        <div class="setting-group">
+          <div class="sg-title">Performance</div>
+          <div class="setting-row">
+            <span class="sr-label">
+              Lite Portal
+              <span class="sr-sublabel">Pauses wormhole animations to reduce CPU &amp; GPU usage. A single ring pulse still plays on each transfer.</span>
+            </span>
+            <label class="toggle-switch">
+              <input type="checkbox" id="liteToggle" onchange="setLiteMode(this.checked)"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+        <div class="setting-group">
           <div class="sg-title">About</div>
           <div class="setting-row"><span class="sr-label">Version</span><span class="sr-val">2.0.0</span></div>
           <div class="setting-row"><span class="sr-label">Protocol</span><span class="sr-val">UTP/1.0 · HTTPS · AES-256</span></div>
@@ -653,13 +834,47 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 
 <div class="toast-wrap" id="toastWrap"></div>
 
+<!-- PRO UPGRADE MODAL -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal">
+    <div class="modal-icon">✦</div>
+    <div class="modal-title">Unlock IRONBEAM Pro</div>
+    <div class="modal-sub">You've used your 5 free transfers. Go Pro for unlimited transfers — cancel anytime.</div>
+    <div class="modal-plans">
+      <div class="plan-card" id="planMonthly" onclick="selectPlan('monthly')">
+        <div class="plan-price">CA$3.69</div>
+        <div class="plan-period">PER MONTH</div>
+      </div>
+      <div class="plan-card featured" id="planYearly" onclick="selectPlan('yearly')">
+        <div class="plan-badge">BEST VALUE</div>
+        <div class="plan-price">CA$29.99</div>
+        <div class="plan-period">PER YEAR</div>
+        <div class="plan-save">Save CA$14.29</div>
+      </div>
+    </div>
+    <button class="modal-upgrade-btn" id="upgradeBtn" onclick="startCheckout()">Upgrade Now →</button>
+    <button class="modal-skip" onclick="closeUpgradeModal()">Maybe later</button>
+  </div>
+</div>
+
 <script>
 const IB_IS_ELECTRON = typeof window.IB !== 'undefined';
+const FREE_LIMIT = 5;
+const VERIFY_URL = 'https://ironbeam.ca/pro/verify.php';
+const CHECKOUT_URL = 'https://ironbeam.ca/pro/checkout.php';
+let _activeRamp = null;
+let _selectedPlan = 'yearly'; // default to best value
 let state = {
-  files: [],
-  totalTransfers: 0,
-  totalBytes: 0,
-  serverInfo: null,
+  files:           [],
+  phoneFileList:   [],
+  totalTransfers:  parseInt(localStorage.getItem('ib-xfers') || '0'),
+  totalBytes:      parseInt(localStorage.getItem('ib-bytes') || '0'),
+  serverInfo:      null,
+  phoneConnected:  false,
+  phoneIp:         null,
+  isPro:           localStorage.getItem('ib-pro-key') ? true : false,
+  proKey:          localStorage.getItem('ib-pro-key') || null,
+  proEmail:        localStorage.getItem('ib-pro-email') || null,
 };
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
@@ -671,6 +886,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     IB.on('device-connected',     onDeviceConnected);
     IB.on('device-disconnected',  onDeviceDisconnected);
     IB.on('fs-change',            onFsChange);
+    IB.on('phone-file-list',      onPhoneFileList);
 
     // Get initial info
     const info = await IB.getInfo();
@@ -679,6 +895,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   } else {
     // Browser preview mode
     onServerReady({ ip: '10.0.0.21', portHttps: 7443, portHttp: 7878, transferDir: '~/IRONBEAM', connectedDevices: 0 });
+  }
+  // Restore Pro state UI
+  updateProUI();
+  // Restore Lite Mode preference
+  if (localStorage.getItem('ib-lite') === '1') {
+    document.body.classList.add('ib-lite');
+    const lt = document.getElementById('liteToggle');
+    if (lt) lt.checked = true;
+  }
+  // Restore persisted transfer counters to display
+  if (state.totalTransfers > 0) {
+    document.getElementById('xferCount').textContent = state.totalTransfers;
+    document.getElementById('xferSize').textContent  = fmt(state.totalBytes);
+    const badge = document.getElementById('filesBadge');
+    badge.textContent = state.totalTransfers > 99 ? '99+' : state.totalTransfers;
   }
 });
 
@@ -698,30 +929,84 @@ function onServerReady(info) {
   document.getElementById('setUrl').textContent = url;
   document.getElementById('setDir').textContent = info.transferDir;
   document.getElementById('setStatus').textContent = 'Running';
+
+  // Restore connected state if phone was already connected when the window loaded
+  if (info.connectedDevices > 0 && !state.phoneConnected) {
+    state.phoneConnected = true;
+    document.getElementById('deviceDot').className = 'dc-dot on';
+    document.getElementById('deviceLabel').textContent = `${info.connectedDevices} connected`;
+    setPhoneStatusConnected(true, null);
+    renderPhoneFiles();
+  }
 }
 
 // ── Device connection ─────────────────────────────────────────────────────────
+function setPhoneStatusConnected(on, ip) {
+  const el = document.getElementById('phoneConnStatus');
+  const banner = document.getElementById('phoneConnBanner');
+  const ipEl = document.getElementById('pcbIp');
+  if (on) {
+    el.textContent = '● Connected';
+    el.className = 'phone-status-on';
+    if (banner) banner.style.display = 'flex';
+    if (ipEl && ip) ipEl.textContent = ip;
+    else if (ipEl) ipEl.textContent = '';
+  } else {
+    el.textContent = 'Not connected';
+    el.className = '';
+    el.removeAttribute('style');
+    el.style.cssText = 'font-size:10px;color:var(--steel3)';
+    if (banner) banner.style.display = 'none';
+    if (ipEl) ipEl.textContent = '';
+  }
+}
+
 function onDeviceConnected(data) {
+  state.phoneConnected = true;
+  state.phoneIp = data.ip || null;
   document.getElementById('deviceDot').className = 'dc-dot on';
   document.getElementById('deviceLabel').textContent = `${data.count} connected`;
-  document.getElementById('phoneConnStatus').textContent = `${data.count} device connected`;
-  document.getElementById('phoneEmpty').querySelector('p').textContent = 'Device connected — files sent from iPhone appear here';
+  setPhoneStatusConnected(true, data.ip);
   showToast(`📱 iPhone connected`, 'ok');
+  // Refresh file list so panel is guaranteed up-to-date on connect
+  refreshDesktopFiles();
 }
 
 function onDeviceDisconnected(data) {
   if (data.count === 0) {
+    state.phoneConnected = false;
+    state.phoneIp = null;
     document.getElementById('deviceDot').className = 'dc-dot';
     document.getElementById('deviceLabel').textContent = 'No device';
-    document.getElementById('phoneConnStatus').textContent = 'Not connected';
+    setPhoneStatusConnected(false, null);
+    renderPhoneFiles();
   }
   showToast('📴 iPhone disconnected');
 }
 
+function onPhoneFileList(files) {
+  state.phoneFileList = files || [];
+  renderPhoneFiles();
+}
+
+async function pullFromPhone(name) {
+  if (!IB_IS_ELECTRON) return;
+  showToast(`⬇ Requesting "${name}" from iPhone…`);
+  await IB.pullFromPhone(name);
+}
+
 // ── File received ─────────────────────────────────────────────────────────────
 function onFileReceived(data) {
+  // Check free limit BEFORE counting (so transfer #5 goes through, #6 triggers modal)
+  if (!state.isPro && state.totalTransfers >= FREE_LIMIT) {
+    showUpgradeModal();
+    return; // block the transfer display — file not counted
+  }
   state.totalTransfers++;
   state.totalBytes += data.size || 0;
+  localStorage.setItem('ib-xfers', state.totalTransfers);
+  localStorage.setItem('ib-bytes', state.totalBytes);
+  updateProUI();
   document.getElementById('xferCount').textContent = state.totalTransfers;
   document.getElementById('xferSize').textContent = fmt(state.totalBytes);
   showToast(`✓ Received: ${data.name}`, 'ok');
@@ -733,10 +1018,11 @@ function onFileReceived(data) {
   // Trigger wormhole animation
   IBWormhole.open(data.name);
   let p = 0;
-  const ramp = setInterval(() => {
+  if (_activeRamp) { clearInterval(_activeRamp); _activeRamp = null; }
+  _activeRamp = setInterval(() => {
     p = Math.min(1, p + 0.07);
     IBWormhole.progress(p);
-    if (p >= 1) { clearInterval(ramp); IBWormhole.complete(`${fmt(data.size || 0)} received`); }
+    if (p >= 1) { clearInterval(_activeRamp); _activeRamp = null; IBWormhole.complete(`${fmt(data.size || 0)} received`); }
   }, 40);
 }
 
@@ -759,6 +1045,7 @@ async function refreshDesktopFiles(newFileName) {
   state.files = files;
   renderDesktopFiles(newFileName);
   renderFilesList();
+  renderPhoneFiles();
   document.getElementById('filesCount').textContent = `${files.length} file${files.length !== 1 ? 's' : ''} in transfer folder`;
   document.getElementById('setCount').textContent = files.length;
 }
@@ -813,12 +1100,73 @@ function renderFilesList() {
       </div>
       <div class="fr-actions">
         <button class="fr-btn" title="Open" onclick="event.stopPropagation();openFile('${esc(f.name)}')">↗</button>
+        <button class="fr-btn share" title="Share file path" onclick="event.stopPropagation();shareFile('${esc(f.name)}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg></button>
         <button class="fr-btn del" title="Delete" onclick="event.stopPropagation();deleteFile('${esc(f.name)}')">✕</button>
       </div>
     </div>`).join('');
 }
 
 function filterFiles() { renderFilesList(); }
+
+function renderPhoneFiles() {
+  const inner = document.getElementById('phoneFileInner');
+  const empty = document.getElementById('phoneEmpty');
+  if (!inner || !empty) return;
+
+  if (!state.phoneConnected) {
+    empty.style.display = 'flex';
+    empty.querySelector('p').innerHTML = 'Connect your iPhone<br/>to see its files here';
+    Array.from(inner.children).forEach(c => { if (c !== empty) c.remove(); });
+    return;
+  }
+
+  // Show iPhone's available files (sent to us via phone-file-list)
+  if (state.phoneFileList && state.phoneFileList.length) {
+    empty.style.display = 'none';
+    Array.from(inner.children).forEach(c => { if (c !== empty) c.remove(); });
+    const header = document.createElement('div');
+    header.style.cssText = 'font-size:10px;color:var(--steel3);padding:6px 8px 4px;letter-spacing:.06em;text-transform:uppercase';
+    header.textContent = 'On iPhone — click ⬇ to pull';
+    inner.appendChild(header);
+    state.phoneFileList.forEach(f => {
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      card.innerHTML = `
+        <div class="fc-icon">${emoji(f.name)}</div>
+        <div class="fc-meta">
+          <div class="fc-name">${esc(f.name)}</div>
+          <div class="fc-size">${fmt(f.size)}</div>
+        </div>
+        <div class="fc-actions" style="display:flex">
+          <button class="fc-btn" title="Pull to PC" onclick="pullFromPhone('${esc(f.name)}')">⬇</button>
+        </div>`;
+      inner.appendChild(card);
+    });
+    return;
+  }
+
+  empty.style.display = 'flex';
+  empty.querySelector('p').innerHTML = 'iPhone connected!<br/>Select files on iPhone to see them here';
+  Array.from(inner.children).forEach(c => { if (c !== empty) c.remove(); });
+}
+
+async function pushToPhone(name) {
+  if (!IB_IS_ELECTRON) { showToast(`📱 "${name}" sent to iPhone`, 'ok'); return; }
+  const sent = await IB.pushToPhone(name);
+  if (sent > 0) {
+    showToast(`📱 "${name}" pushed to iPhone`, 'ok');
+    IBWormhole.open(name);
+    let p = 0;
+    if (_activeRamp) { clearInterval(_activeRamp); _activeRamp = null; }
+    _activeRamp = setInterval(() => {
+      p = Math.min(1, p + 0.08);
+      IBWormhole.progress(p);
+      if (p >= 1) { clearInterval(_activeRamp); _activeRamp = null; IBWormhole.complete('Sent to iPhone ✓'); }
+    }, 35);
+  } else {
+    showToast(`📁 "${name}" ready — open Receive tab on iPhone`, 'ok');
+  }
+}
 
 async function openFile(name) {
   if (IB_IS_ELECTRON) await IB.openFile(name);
@@ -836,6 +1184,123 @@ async function deleteFile(name) {
     renderDesktopFiles();
     renderFilesList();
     showToast(`Deleted ${name}`);
+  }
+}
+
+// ── Cancel transfer ───────────────────────────────────────────────────────────
+function cancelTransfer() {
+  if (_activeRamp) { clearInterval(_activeRamp); _activeRamp = null; }
+  IBWormhole.cancel();
+  showToast('Transfer cancelled');
+}
+
+// ── Lite Mode ─────────────────────────────────────────────────────────────────
+function setLiteMode(on) {
+  document.body.classList.toggle('ib-lite', on);
+  localStorage.setItem('ib-lite', on ? '1' : '0');
+  const lt = document.getElementById('liteToggle');
+  if (lt) lt.checked = on;
+  showToast(on ? '🔋 Lite Portal on — animations paused' : '✦ Live Portal on — animations restored');
+}
+
+// ── Pro / Paywall ─────────────────────────────────────────────────────────────
+function updateProUI() {
+  const bar   = document.getElementById('proStatusBar');
+  const label = document.getElementById('proStatusLabel');
+  const val   = document.getElementById('proStatusVal');
+  const row   = document.getElementById('licenseInputRow');
+  if (!bar) return;
+  if (state.isPro) {
+    bar.style.background = 'linear-gradient(90deg,rgba(29,158,117,.12),rgba(29,158,117,.06))';
+    bar.style.borderColor = 'rgba(29,158,117,.3)';
+    label.textContent = '✦ IRONBEAM Pro — Unlimited transfers';
+    label.style.color = 'var(--green)';
+    val.textContent = state.proEmail || '';
+    if (row) row.style.display = 'none';
+  } else {
+    const used = state.totalTransfers;
+    const left = Math.max(0, FREE_LIMIT - used);
+    bar.style.background = '';
+    bar.style.borderColor = '';
+    label.style.color = '';
+    label.textContent = left > 0
+      ? `Free — ${left} transfer${left !== 1 ? 's' : ''} remaining`
+      : 'Free limit reached — upgrade to continue';
+    val.textContent = '';
+    if (row) row.style.display = '';
+  }
+}
+
+function checkFreeLimit() {
+  if (state.isPro) return true;          // Pro — always allow
+  if (state.totalTransfers < FREE_LIMIT) return true; // Under limit
+  showUpgradeModal();
+  return false;
+}
+
+function showUpgradeModal() {
+  document.getElementById('upgradeModal').classList.add('show');
+}
+
+function closeUpgradeModal() {
+  document.getElementById('upgradeModal').classList.remove('show');
+}
+
+function selectPlan(plan) {
+  _selectedPlan = plan;
+  document.getElementById('planMonthly').classList.toggle('featured', plan === 'monthly');
+  document.getElementById('planYearly').classList.toggle('featured', plan === 'yearly');
+}
+
+function startCheckout() {
+  const url = `${CHECKOUT_URL}?plan=${_selectedPlan}`;
+  // In Electron, open in system browser; in browser preview, open new tab
+  if (IB_IS_ELECTRON && IB.openExternal) {
+    // Fetch the checkout URL from our server then open it
+    fetch(url)
+      .then(r => r.json())
+      .then(d => { if (d.url) IB.openExternal(d.url); else showToast('Could not start checkout', 'err'); })
+      .catch(() => showToast('Could not reach ironbeam.ca', 'err'));
+  } else {
+    window.open(url, '_blank');
+  }
+  closeUpgradeModal();
+}
+
+async function activateLicense() {
+  const input = document.getElementById('licenseKeyInput');
+  const key   = (input?.value || '').trim().toUpperCase();
+  if (!key.startsWith('BEAM-')) { showToast('Invalid key format', 'err'); return; }
+  // Developer / owner bypass — works offline, no server call needed
+  if (key === 'BEAM-DEV-F96CE2-3EC9F1') {
+    state.isPro    = true;
+    state.proKey   = key;
+    state.proEmail = 'developer@ironbeam.ca';
+    localStorage.setItem('ib-pro-key',   key);
+    localStorage.setItem('ib-pro-email', 'developer@ironbeam.ca');
+    updateProUI();
+    closeUpgradeModal();
+    showToast('✦ IRONBEAM Pro activated! Unlimited transfers unlocked.', 'ok');
+    return;
+  }
+  showToast('Verifying license...');
+  try {
+    const r = await fetch(`${VERIFY_URL}?key=${encodeURIComponent(key)}`, { signal: AbortSignal.timeout(8000) });
+    const d = await r.json();
+    if (d.valid) {
+      state.isPro    = true;
+      state.proKey   = key;
+      state.proEmail = d.email || '';
+      localStorage.setItem('ib-pro-key',   key);
+      localStorage.setItem('ib-pro-email', d.email || '');
+      updateProUI();
+      closeUpgradeModal();
+      showToast('✦ IRONBEAM Pro activated! Unlimited transfers unlocked.', 'ok');
+    } else {
+      showToast(`License invalid: ${d.error || 'unknown error'}`, 'err');
+    }
+  } catch {
+    showToast('Could not verify — check your connection', 'err');
   }
 }
 
@@ -863,6 +1328,16 @@ function renderQR() {
 async function copyToClipboard(text) {
   try { await navigator.clipboard.writeText(text); showToast('Copied!', 'ok'); }
   catch { showToast('Could not copy', 'err'); }
+}
+function shareFile(name) {
+  const dir = state.info?.transferDir || '';
+  const fullPath = dir ? dir + '\\' + name : name;
+  copyToClipboard(fullPath);
+}
+function shareApp() {
+  navigator.clipboard.writeText('https://ironbeam.ca')
+    .then(() => showToast('Link copied — share with a friend!', 'ok'))
+    .catch(() => showToast('https://ironbeam.ca', 'ok'));
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
@@ -900,9 +1375,11 @@ function timeAgo(ts) {
 // ────────────────────────────────────────────────────────────────────────
 window.IBWormhole = (function(){
   const SVGNS='http://www.w3.org/2000/svg';
-  let stage, canvas, ctx, flash, ripples, arcs, label;
+  let stage, canvas, ctx, flash, ripples, arcs, label, litePulse;
   let state='idle', progress=0, particles=[], sparks=[], sparkAcc=0;
   let raf=null, lastT=performance.now(), bursting=false;
+  let cvW=0, cvH=0; // canvas CSS pixel dimensions (larger than stage)
+  function isLite(){ return document.body.classList.contains('ib-lite'); }
   const MAX_P=90, MAX_S=10;
 
   function gid(id){return document.getElementById(id);}
@@ -910,7 +1387,7 @@ window.IBWormhole = (function(){
     stage=gid('whStage');
     if(!stage) return false;
     canvas=gid('whParticles'); ctx=canvas.getContext('2d');
-    flash=gid('whFlash'); arcs=gid('wh-arcs');
+    flash=gid('whFlash'); arcs=gid('wh-arcs'); litePulse=gid('whLitePulse');
     ripples=[gid('whRp1'),gid('whRp2'),gid('whRp3')];
     label=gid('whLabel');
     window.addEventListener('resize', resize);
@@ -923,16 +1400,17 @@ window.IBWormhole = (function(){
   function resize(){
     if(!canvas||!stage) return;
     const dpr=Math.min(window.devicePixelRatio||1,2);
-    const w=stage.clientWidth, h=stage.clientHeight;
-    canvas.width=w*dpr; canvas.height=h*dpr;
-    canvas.style.width=w+'px'; canvas.style.height=h+'px';
+    // Use the canvas's own size (larger than stage due to CSS inset:-60px)
+    cvW=canvas.offsetWidth||canvas.clientWidth;
+    cvH=canvas.offsetHeight||canvas.clientHeight;
+    canvas.width=cvW*dpr; canvas.height=cvH*dpr;
     ctx.setTransform(dpr,0,0,dpr,0,0);
   }
   function spawnP(){
     const w=stage.clientWidth, h=stage.clientHeight;
     const maxR=Math.min(w,h)*0.46, minR=Math.min(w,h)*0.10;
     const isHead=Math.random()<0.08;
-    return {cx:w/2, cy:h/2, angle:Math.random()*Math.PI*2,
+    return {cx:cvW/2, cy:cvH/2, angle:Math.random()*Math.PI*2,
       radius:maxR*(0.9+Math.random()*0.15), maxR, minR,
       angVel:isHead?(0.4+Math.random()*0.7):(0.6+Math.random()*1.4),
       inVel: isHead?(14+Math.random()*16):(18+Math.random()*22),
@@ -941,15 +1419,21 @@ window.IBWormhole = (function(){
   }
   function spawnSpark(){
     const w=stage.clientWidth, h=stage.clientHeight, base=Math.min(w,h);
-    return {cx:w/2, cy:h/2, angle:Math.random()*Math.PI*2,
+    return {cx:cvW/2, cy:cvH/2, angle:Math.random()*Math.PI*2,
       radius:base*(0.36+Math.random()*0.08), life:0,
       lifeMax:0.45+Math.random()*0.30, baseSize:1+Math.random()*1.6};
   }
   function tick(now){
     const dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+    // Lite mode: clear canvas and idle — no particles, no sparks
+    if(isLite()){
+      ctx.clearRect(0,0,cvW,cvH);
+      raf=requestAnimationFrame(tick);
+      return;
+    }
     ctx.globalCompositeOperation='source-over';
     ctx.fillStyle='rgba(5,3,8,'+(state==='idle'?'0.09':'0.06')+')';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillRect(0,0,cvW,cvH);
     ctx.globalCompositeOperation='lighter';
     if(state==='transferring'||state==='bursting'){
       const spawn=(state==='bursting'?22:6)+(progress*9);
@@ -1017,12 +1501,30 @@ window.IBWormhole = (function(){
     setTimeout(()=>Array.from(arcs.children).forEach(p=>p.classList.add('fade')),360);
     setTimeout(()=>{while(arcs&&arcs.firstChild)arcs.removeChild(arcs.firstChild);},600);
   }
+  function setCancelBtn(show){
+    const btn=document.getElementById('xferCancel');
+    if(btn) btn.style.display=show?'block':'none';
+  }
+  function fireLitePulse(){
+    if(!litePulse) return;
+    litePulse.classList.remove('fire');
+    void litePulse.offsetWidth; // reflow to restart animation
+    litePulse.classList.add('fire');
+    setTimeout(()=>litePulse&&litePulse.classList.remove('fire'),1400);
+  }
   function open(filename){
     if(!stage&&!init()) return;
-    setState('transferring');
     if(label) label.textContent=filename||'Transferring…';
+    if(isLite()){
+      // Lite mode: just flash the label and fire the ring — no heavy animation
+      fireLitePulse();
+      setCancelBtn(true);
+      return;
+    }
+    setState('transferring');
     progress=0; sparks=[]; particles=[];
     if(!raf){lastT=performance.now(); raf=requestAnimationFrame(tick);}
+    setCancelBtn(true);
   }
   function pct(p){
     if(!stage) return;
@@ -1031,6 +1533,14 @@ window.IBWormhole = (function(){
   }
   function complete(text){
     if(!stage||bursting) return;
+    if(isLite()){
+      // Lite mode: brief flash + label update, skip full burst
+      if(flash){flash.classList.remove('fire');void flash.offsetWidth;flash.classList.add('fire');}
+      fireLitePulse();
+      setTimeout(()=>{if(label) label.textContent='✦ Complete';},400);
+      setTimeout(()=>{if(label) label.textContent='IRONBEAM'; setCancelBtn(false);},1800);
+      return;
+    }
     bursting=true; setState('bursting'); progress=1;
     spawnLightning();
     setTimeout(()=>{
@@ -1049,10 +1559,17 @@ window.IBWormhole = (function(){
     while(arcs&&arcs.firstChild) arcs.removeChild(arcs.firstChild);
     progress=0; sparks=[]; particles=[];
     if(label) label.textContent='IRONBEAM';
+    setCancelBtn(false);
+  }
+  function cancel(){
+    bursting=false;
+    if(stage) stage.classList.remove('completing');
+    if(litePulse) litePulse.classList.remove('fire');
+    _idle();
   }
 
   document.addEventListener('DOMContentLoaded',()=>{init();});
-  return {open, progress:pct, complete, idle:_idle};
+  return {open, progress:pct, complete, idle:_idle, cancel};
 })();
 
 // ── Wormhole drop target (drag desktop file or external file → iPhone) ────────
@@ -1060,11 +1577,12 @@ window.IBWormhole = (function(){
   function wormholeTransfer(name) {
     IBWormhole.open(name);
     let p = 0;
-    const ramp = setInterval(() => {
+    if (_activeRamp) { clearInterval(_activeRamp); _activeRamp = null; }
+    _activeRamp = setInterval(() => {
       p = Math.min(1, p + 0.08);
       IBWormhole.progress(p);
       if (p >= 1) {
-        clearInterval(ramp);
+        clearInterval(_activeRamp); _activeRamp = null;
         IBWormhole.complete('Sent to iPhone ✓');
       }
     }, 35);
