@@ -96,6 +96,9 @@ function createWindow() {
       mainWindow?.webContents.send('device-disconnected', { count: 0 });
       updateTrayMenu(false);
     });
+    serverCore.onPhoneFileList(files => {
+      mainWindow?.webContents.send('phone-file-list', files);
+    });
   }
 }
 
@@ -148,7 +151,8 @@ ipcMain.handle('open-file',           (_, n) => shell.openPath(path.join(TRANSFE
 ipcMain.handle('open-transfer-folder',()     => shell.openPath(TRANSFER_DIR));
 ipcMain.handle('open-folder',         ()     => shell.openPath(TRANSFER_DIR)); // legacy alias
 ipcMain.handle('delete-file', (_, n) => { try { fs.unlinkSync(path.join(TRANSFER_DIR, n)); return true; } catch { return false; } })
-ipcMain.handle('push-to-phone', (_, name) => serverCore?.pushFileToPhone(name) ?? 0);
+ipcMain.handle('push-to-phone',  (_, name) => serverCore?.pushFileToPhone(name) ?? 0);
+ipcMain.handle('pull-from-phone', (_, name) => serverCore?.pullFromPhone(name));
 ipcMain.handle('copy-file', async (_, sourcePath) => {
   try {
     const name = path.basename(sourcePath);

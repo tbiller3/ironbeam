@@ -489,13 +489,34 @@ body.ib-lite .wh-core::after {
   box-shadow:0 0 6px rgba(245,192,80,.5);
 }
 .sr-sublabel{display:block;font-size:11px;color:var(--steel3);font-weight:400;margin-top:3px;line-height:1.45}
+
+/* ── Clickable value cells ── */
+.clickable{cursor:pointer;transition:color .15s}
+.clickable:hover{color:var(--beam2) !important;text-decoration:underline}
+.dc-ip:hover{color:var(--beam2);transition:color .15s}
+.qr-url:hover{color:var(--beam2);text-decoration:underline}
+.xfer-stats:hover .xs-val{color:var(--beam2)}
+.xfer-stats:hover .xs-lbl{color:var(--steel2)}
+
+/* ── Push to iPhone button ── */
+.fc-btn.push:hover{color:var(--green) !important;background:rgba(29,158,117,.12)}
+
+/* ── Keyboard / focus accessibility — show actions when card has focus ── */
+.file-card:focus-within .fc-actions,
+.file-row:focus-within .fr-actions{display:flex !important}
+
+/* ── Pro bar hover ── */
+.pro-bar:hover{border-color:var(--b1) !important;background:linear-gradient(90deg,rgba(232,160,32,.12),rgba(232,160,32,.06)) !important}
+
+/* ── Connect URL hover ── */
+.qr-url{transition:color .15s}
 </style>
 </head>
 <body>
 
 <!-- Titlebar -->
 <div class="titlebar">
-  <div class="tb-logo">
+  <div class="tb-logo" onclick="switchPanel('transfer')" title="IRONBEAM — Go to Transfer" style="cursor:pointer">
     <svg viewBox="0 0 22 22" fill="none">
       <path d="M3 11 L11 2 L19 11 L11 20 Z" stroke="#e8a020" stroke-width="1.8" stroke-linejoin="round"/>
       <path d="M11 2 L11 20M3 11 L19 11" stroke="#c07010" stroke-width=".8" stroke-dasharray="2 2"/>
@@ -557,7 +578,7 @@ body.ib-lite .wh-core::after {
           <div class="dc-dot" id="deviceDot"></div>
           <span class="dc-label" id="deviceLabel">No device</span>
         </div>
-        <div class="dc-ip" id="deviceIp">—</div>
+        <div class="dc-ip" id="deviceIp" onclick="copyToClipboard(this.textContent)" title="Click to copy IP:port" style="cursor:pointer">—</div>
       </div>
     </div>
   </div>
@@ -662,11 +683,11 @@ body.ib-lite .wh-core::after {
           </div>
           <div class="wh-label" id="whLabel">IRONBEAM</div>
           <button class="xfer-cancel" id="xferCancel" onclick="cancelTransfer()">✕ Cancel</button>
-          <div class="xfer-stats" style="margin-top:4px">
+          <div class="xfer-stats" style="margin-top:4px;cursor:pointer" onclick="switchPanel('files')" title="View all files">
             <div class="xs-val" id="xferCount">0</div>
             <div class="xs-lbl">transfers</div>
           </div>
-          <div class="xfer-stats">
+          <div class="xfer-stats" style="cursor:pointer" onclick="switchPanel('files')" title="View all files">
             <div class="xs-val" id="xferSize">0 B</div>
             <div class="xs-lbl">total</div>
           </div>
@@ -675,7 +696,7 @@ body.ib-lite .wh-core::after {
         <div class="transfer-side">
           <div class="ts-head">
             <span class="ts-label">📱 iPhone</span>
-            <span id="phoneConnStatus" style="font-size:10px;color:var(--steel3)">Not connected</span>
+            <span id="phoneConnStatus" style="font-size:10px;color:var(--steel3);cursor:pointer" onclick="if(!state.phoneConnected)switchPanel('connect')" title="Click to connect iPhone">Not connected</span>
           </div>
           <div class="file-scroll" id="phoneFiles" style="display:flex;flex-direction:column;padding:0">
             <div class="phone-conn-banner" id="phoneConnBanner">
@@ -745,10 +766,10 @@ body.ib-lite .wh-core::after {
           <div class="ch-sub" style="margin-top:6px">Open Safari on your iPhone and navigate to the address below. Both devices must be on the same Wi-Fi network.</div>
         </div>
         <div class="qr-wrap">
-          <div class="qr-placeholder" id="qrPlaceholder">📱</div>
+          <div class="qr-placeholder" id="qrPlaceholder" onclick="copyToClipboard(document.getElementById('connectUrl').textContent)" title="Click to copy URL" style="cursor:pointer">📱</div>
           <img class="qr-img" id="qrImg" alt="QR code"/>
-          <div class="qr-label">Open in iPhone Safari</div>
-          <div class="qr-url" id="connectUrl">Starting server...</div>
+          <div class="qr-label">Open in iPhone Safari — click URL to copy</div>
+          <div class="qr-url" id="connectUrl" onclick="copyToClipboard(this.textContent)" title="Click to copy" style="cursor:pointer">Starting server...</div>
         </div>
         <div class="steps-grid">
           <div class="step-card">
@@ -775,8 +796,8 @@ body.ib-lite .wh-core::after {
       <div class="settings-body">
         <div class="setting-group">
           <div class="sg-title">Network</div>
-          <div class="setting-row"><span class="sr-label">Your IP address</span><span class="sr-val highlight" id="setIp">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setIp').textContent)">Copy</button></div>
-          <div class="setting-row"><span class="sr-label">iPhone URL</span><span class="sr-val highlight" id="setUrl">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setUrl').textContent)">Copy</button></div>
+          <div class="setting-row"><span class="sr-label">Your IP address</span><span class="sr-val highlight clickable" id="setIp" onclick="copyToClipboard(this.textContent)" title="Click to copy">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setIp').textContent)">Copy</button></div>
+          <div class="setting-row"><span class="sr-label">iPhone URL</span><span class="sr-val highlight clickable" id="setUrl" onclick="copyToClipboard(this.textContent)" title="Click to copy">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setUrl').textContent)">Copy</button></div>
           <div class="setting-row"><span class="sr-label">HTTPS port</span><span class="sr-val">7443</span></div>
           <div class="setting-row"><span class="sr-label">Status</span><span class="sr-val highlight" id="setStatus">Starting...</span></div>
         </div>
@@ -787,7 +808,7 @@ body.ib-lite .wh-core::after {
         </div>
         <div class="setting-group">
           <div class="sg-title">Pro License</div>
-          <div class="pro-bar" id="proStatusBar">
+          <div class="pro-bar" id="proStatusBar" onclick="if(!state.isPro)showUpgradeModal()" style="cursor:pointer" title="Click to upgrade">
             <span class="pro-bar-label" id="proStatusLabel">Free — 5 transfers remaining</span>
             <span class="pro-bar-val" id="proStatusVal"></span>
           </div>
@@ -824,7 +845,7 @@ body.ib-lite .wh-core::after {
           <div class="setting-row"><span class="sr-label">Version</span><span class="sr-val">2.0.0</span></div>
           <div class="setting-row"><span class="sr-label">Protocol</span><span class="sr-val">UTP/1.0 · HTTPS · AES-256</span></div>
           <div class="setting-row"><span class="sr-label">Copyright</span><span class="sr-val">© 2025 IRONBEAM Technologies</span></div>
-          <div class="setting-row"><span class="sr-label">Website</span><span class="sr-val highlight">ironbeam.ca</span></div>
+          <div class="setting-row"><span class="sr-label">Website</span><span class="sr-val highlight clickable" onclick="IB_IS_ELECTRON&&IB.openExternal?IB.openExternal('https://ironbeam.ca'):window.open('https://ironbeam.ca','_blank')" title="Open ironbeam.ca">ironbeam.ca ↗</span></div>
         </div>
       </div>
     </div>
@@ -1067,7 +1088,8 @@ function renderDesktopFiles(newFileName) {
         <div class="fc-size">${fmt(f.size)} · ${timeAgo(f.modified)}</div>
       </div>
       <div class="fc-actions">
-        <button class="fc-btn" title="Open" onclick="openFile('${esc(f.name)}')">↗</button>
+        <button class="fc-btn push" title="Push to iPhone" onclick="pushToPhone('${esc(f.name)}')">📱</button>
+        <button class="fc-btn" title="Open file" onclick="openFile('${esc(f.name)}')">↗</button>
         <button class="fc-btn del" title="Delete" onclick="deleteFile('${esc(f.name)}')">✕</button>
       </div>`;
     card.addEventListener('click', e => { if (!e.target.closest('.fc-actions')) openFile(f.name); });
@@ -1131,15 +1153,17 @@ function renderPhoneFiles() {
     state.phoneFileList.forEach(f => {
       const card = document.createElement('div');
       card.className = 'file-card';
+      card.title = 'Click to pull to PC';
       card.innerHTML = `
         <div class="fc-icon">${emoji(f.name)}</div>
         <div class="fc-meta">
           <div class="fc-name">${esc(f.name)}</div>
-          <div class="fc-size">${fmt(f.size)}</div>
+          <div class="fc-size">${fmt(f.size)} · tap to pull to PC</div>
         </div>
         <div class="fc-actions" style="display:flex">
-          <button class="fc-btn" title="Pull to PC" onclick="pullFromPhone('${esc(f.name)}')">⬇</button>
+          <button class="fc-btn" title="Pull to PC" onclick="event.stopPropagation();pullFromPhone('${esc(f.name)}')">⬇</button>
         </div>`;
+      card.addEventListener('click', e => { if (!e.target.closest('.fc-actions')) pullFromPhone(f.name); });
       inner.appendChild(card);
     });
     return;

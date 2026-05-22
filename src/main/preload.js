@@ -9,8 +9,9 @@ contextBridge.exposeInMainWorld('IB', {
   maximize: () => ipcRenderer.send('window-maximize'),
   hide:     () => ipcRenderer.send('window-hide'),
   quit:     () => ipcRenderer.send('window-quit'),
-  pushToPhone: (name)       => ipcRenderer.invoke('push-to-phone', name),
-  copyFile:    (sourcePath) => ipcRenderer.invoke('copy-file', sourcePath),
-  on:  (ch, cb) => { const ok=['server-ready','file-received','device-connected','device-disconnected','fs-change']; if(ok.includes(ch)) ipcRenderer.on(ch, (_,d)=>cb(d)); },
+  pushToPhone:   (name)       => ipcRenderer.invoke('push-to-phone', name),
+  pullFromPhone: (name)       => ipcRenderer.invoke('pull-from-phone', name),
+  copyFile:      (sourcePath) => ipcRenderer.invoke('copy-file', sourcePath),
+  on:  (ch, cb) => { const ok=['server-ready','file-received','device-connected','device-disconnected','fs-change','phone-file-list']; if(ok.includes(ch)) ipcRenderer.on(ch, (_,d)=>cb(d)); },
   off: (ch) => ipcRenderer.removeAllListeners(ch),
 });

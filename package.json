@@ -26,7 +26,8 @@
     "copyright": "Copyright 2025 IRONBEAM Technologies",
     "asar": true,
     "asarUnpack": [
-      "node_modules/node-forge/**/*"
+      "node_modules/node-forge/**/*",
+      "phone-app/**/*"
     ],
     "directories": {
       "output": "dist",

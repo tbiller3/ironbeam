@@ -29,6 +29,7 @@ let _phoneConnected = false;
 const _fileReceivedCbs   = [];
 const _phoneConnectedCbs = [];
 const _phoneDisconnCbs   = [];
+const _phoneFileListCbs  = [];
 
 function getIp() {
   const nets = os.networkInterfaces();
@@ -105,7 +106,12 @@ async function start() {
 
   const phoneAppPath = path.join(__dirname, 'phone-app', 'index.html');
   expressApp.get('/', (req,res) => res.redirect('/phone'));
-  expressApp.get('/phone', (req,res) => fs.existsSync(phoneAppPath) ? res.sendFile(phoneAppPath) : res.status(404).send('Phone app missing'));
+  expressApp.get('/phone', (req,res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    if (fs.existsSync(phoneAppPath)) res.sendFile(phoneAppPath);
+    else res.status(404).send('Phone app missing');
+  });
   expressApp.get('/install', (req,res) => {
     if (fs.existsSync(PROFILE_FILE)) {
       res.setHeader('Content-Type','application/x-apple-aspen-config');
@@ -151,6 +157,51 @@ async function start() {
     try { fs.unlinkSync(fp); res.json({ ok:true }); } catch { res.status(404).json({ error:'Not found' }); }
   });
 
+  // Redirect shortcut — lets the phone open a browser and download the Windows installer
+  expressApp.get('/download-win', (req,res) => {
+    res.redirect('https://ironbeam.ca/releases/IRONBEAM-Setup.exe');
+  });
+
+  // iPhone triggers the PC to pull the Windows installer from ironbeam.ca into the transfer folder
+  expressApp.get('/api/fetch-installer', (req,res) => {
+    const destPath = path.join(TRANSFER_DIR, 'IRONBEAM-Setup.exe');
+    res.json({ ok:true, message:'Downloading IRONBEAM for Windows…' });
+    broadcastToPhone({ event:'installer-status', status:'downloading', message:'Downloading installer to PC…' });
+    function doDownload(url, hops) {
+      if (hops > 5) {
+        broadcastToPhone({ event:'installer-status', status:'error', message:'Too many redirects' });
+        return;
+      }
+      const mod = url.startsWith('https') ? https : http;
+      mod.get(url, resp => {
+        if (resp.statusCode >= 300 && resp.statusCode < 400 && resp.headers.location) {
+          return doDownload(resp.headers.location, hops + 1);
+        }
+        const out = fs.createWriteStream(destPath);
+        resp.pipe(out);
+        out.on('finish', () => {
+          out.close(() => {
+            try {
+              const stat = fs.statSync(destPath);
+              _fileReceivedCbs.forEach(cb => cb({ name:'IRONBEAM-Setup.exe', size:stat.size, path:destPath }));
+              broadcastToPhone({ event:'installer-status', status:'ready', message:`IRONBEAM-Setup.exe ready on your PC! (${fmt(stat.size)})` });
+            } catch(e) {
+              broadcastToPhone({ event:'installer-status', status:'error', message:'Could not verify download: ' + e.message });
+            }
+          });
+        });
+        out.on('error', err => {
+          try { fs.unlinkSync(destPath); } catch {}
+          broadcastToPhone({ event:'installer-status', status:'error', message:'Write error: ' + err.message });
+        });
+      }).on('error', err => {
+        try { fs.unlinkSync(destPath); } catch {}
+        broadcastToPhone({ event:'installer-status', status:'error', message:'Download failed: ' + err.message });
+      });
+    }
+    doDownload('https://ironbeam.ca/releases/IRONBEAM-Setup.exe', 0);
+  });
+
   // WebSocket handler (shared by both HTTP and HTTPS servers)
   _wss = new WebSocketServer({ noServer:true });
   function handleUpgrade(req, sock, head) {
@@ -162,6 +213,14 @@ async function start() {
     _phoneConnected = true;
     _phoneConnectedCbs.forEach(cb => cb(clientIp));
     ws.send(JSON.stringify({ event:'connected', host:os.hostname() }));
+    ws.on('message', data => {
+      try {
+        const msg = JSON.parse(data.toString());
+        if (msg.event === 'phone-file-list') {
+          _phoneFileListCbs.forEach(cb => cb(msg.files || []));
+        }
+      } catch {}
+    });
     ws.on('close', () => {
       _phoneConnected = false;
       _phoneDisconnCbs.forEach(cb => cb());
@@ -205,10 +264,23 @@ async function start() {
 
 function stop() { _server?.close(); }
 function isConnected() { return _phoneConnected; }
-function onFileReceived(cb)    { _fileReceivedCbs.push(cb); }
-function onPhoneConnected(cb)  { _phoneConnectedCbs.push(cb); }
+function onFileReceived(cb)      { _fileReceivedCbs.push(cb); }
+function onPhoneConnected(cb)    { _phoneConnectedCbs.push(cb); }
 function onPhoneDisconnected(cb) { _phoneDisconnCbs.push(cb); }
+function onPhoneFileList(cb)     { _phoneFileListCbs.push(cb); }
+
+function pullFromPhone(name) {
+  _wss?.clients.forEach(c => {
+    if (c.readyState === 1) c.send(JSON.stringify({ event: 'file-pull-request', name }));
+  });
+  console.log(`[IRONBEAM] Requested pull of "${name}" from phone`);
+}
 function fmt(b) { if(b<1024)return b+' B'; if(b<1048576)return Math.round(b/1024)+' KB'; return(b/1048576).toFixed(1)+' MB'; }
+
+/** Broadcast a JSON event to all connected phone WebSocket clients. */
+function broadcastToPhone(msg) {
+  _wss?.clients.forEach(c => { if (c.readyState === 1) c.send(JSON.stringify(msg)); });
+}
 
 /** Push a "file ready to download" notification to all connected phone clients. */
 function pushFileToPhone(name) {
@@ -223,4 +295,4 @@ function pushFileToPhone(name) {
   return sent;
 }
 
-module.exports = { start, stop, isConnected, onFileReceived, onPhoneConnected, onPhoneDisconnected, pushFileToPhone };
+module.exports = { start, stop, isConnected, onFileReceived, onPhoneConnected, onPhoneDisconnected, pushFileToPhone, pullFromPhone, onPhoneFileList, broadcastToPhone };
