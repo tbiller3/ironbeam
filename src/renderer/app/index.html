@@ -815,8 +815,17 @@ body.ib-lite .wh-core::after {
         <div class="setting-group">
           <div class="sg-title">Network</div>
           <div class="setting-row"><span class="sr-label">Your IP address</span><span class="sr-val highlight clickable" id="setIp" onclick="copyToClipboard(this.textContent)" title="Click to copy">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setIp').textContent)">Copy</button></div>
+          <div class="setting-row">
+            <span class="sr-label">
+              Connection mode
+              <span class="sr-sublabel">HTTP works instantly. HTTPS requires installing trust profile on iPhone first.</span>
+            </span>
+            <div style="display:flex;gap:6px">
+              <button id="modeHttpBtn"  class="copy-btn" onclick="setConnectionMode('http')"  style="border-color:var(--b1);color:var(--beam2)">HTTP · 7878</button>
+              <button id="modeHttpsBtn" class="copy-btn" onclick="setConnectionMode('https')" style="white-space:nowrap">HTTPS · 7443</button>
+            </div>
+          </div>
           <div class="setting-row"><span class="sr-label">iPhone URL</span><span class="sr-val highlight clickable" id="setUrl" onclick="copyToClipboard(this.textContent)" title="Click to copy">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setUrl').textContent)">Copy</button></div>
-          <div class="setting-row"><span class="sr-label">HTTPS port</span><span class="sr-val">7443</span></div>
           <div class="setting-row"><span class="sr-label">Status</span><span class="sr-val highlight" id="setStatus">Starting...</span></div>
         </div>
         <div class="setting-group">
@@ -968,20 +977,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// ── Connection mode (HTTP vs HTTPS) ───────────────────────────────────────────
+// HTTP (port 7878) — works on first touch, no cert install needed, recommended.
+// HTTPS (port 7443) — requires installing the IRONBEAM Trust profile on iPhone.
+//                     Uploads silently fail until cert is trusted.
+function applyConnectionMode(mode) {
+  const info = state.serverInfo;
+  if (!info) return;
+  const isHttps = mode === 'https';
+  const port = isHttps ? (info.portHttps || 7443) : (info.portHttp || 7878);
+  const url  = `${isHttps ? 'https' : 'http'}://${info.ip}:${port}/phone`;
+
+  // Update displayed URLs in both Connect panel and Settings panel
+  const cu = document.getElementById('connectUrl'); if (cu) cu.textContent = url;
+  const su = document.getElementById('setUrl');     if (su) su.textContent = url;
+  const dip = document.getElementById('deviceIp');  if (dip) dip.textContent = `${info.ip}:${port}`;
+
+  // Visually mark the active button
+  const httpBtn  = document.getElementById('modeHttpBtn');
+  const httpsBtn = document.getElementById('modeHttpsBtn');
+  if (httpBtn && httpsBtn) {
+    httpBtn.style.borderColor  = isHttps ? '' : 'var(--b1)';
+    httpBtn.style.color        = isHttps ? '' : 'var(--beam2)';
+    httpsBtn.style.borderColor = isHttps ? 'var(--b1)' : '';
+    httpsBtn.style.color       = isHttps ? 'var(--beam2)' : '';
+  }
+}
+
+function setConnectionMode(mode) {
+  localStorage.setItem('ib-conn-mode', mode);
+  applyConnectionMode(mode);
+  showToast(mode === 'http'
+    ? 'Switched to HTTP · 7878 — uploads work immediately on iPhone'
+    : 'Switched to HTTPS · 7443 — install IRONBEAM Trust profile on iPhone first');
+}
+
 // ── Server ready ──────────────────────────────────────────────────────────────
 function onServerReady(info) {
   state.serverInfo = info;
-  // Use HTTP (port 7878) as primary — no certificate install needed on iPhone
-  const httpUrl  = `http://${info.ip}:${info.portHttp || 7878}/phone`;
-  const httpsUrl = `https://${info.ip}:${info.portHttps || 7443}/phone`;
-  const url = httpUrl;
+  // Apply the user's persisted connection-mode preference (defaults to HTTP
+  // because HTTP works on first-touch without installing a trust profile).
+  const mode = localStorage.getItem('ib-conn-mode') || 'http';
+  applyConnectionMode(mode);
 
   document.getElementById('tbDot').className = 'tb-dot on pulse';
   document.getElementById('tbStatus').textContent = `Ready · ${info.ip}`;
-  document.getElementById('connectUrl').textContent = url;
-  document.getElementById('deviceIp').textContent = `${info.ip}:${info.portHttp || 7878}`;
   document.getElementById('setIp').textContent = info.ip;
-  document.getElementById('setUrl').textContent = url;
   document.getElementById('setDir').textContent = info.transferDir;
   document.getElementById('setStatus').textContent = 'Running';
 

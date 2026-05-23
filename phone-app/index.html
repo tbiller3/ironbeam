@@ -188,6 +188,44 @@ body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
 .inst-status.ok{color:var(--green)}
 .inst-status.err{color:var(--red)}
 .inst-status.busy{color:var(--beam2)}
+
+/* ── Send chooser sheet (Photo vs File picker) ── */
+.sc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);
+  display:none;align-items:flex-end;justify-content:center;z-index:200;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  animation:sc-fade .18s ease-out}
+.sc-overlay.show{display:flex}
+@keyframes sc-fade{from{opacity:0}to{opacity:1}}
+.sc-sheet{width:100%;max-width:420px;
+  background:var(--bg2);border-top:1px solid var(--b1);
+  border-top-left-radius:18px;border-top-right-radius:18px;
+  padding:18px 16px calc(20px + var(--sb));
+  box-shadow:0 -20px 50px rgba(0,0,0,.5);
+  animation:sc-slide .26s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes sc-slide{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sc-handle{width:36px;height:4px;background:rgba(255,255,255,.18);
+  border-radius:2px;margin:0 auto 14px}
+.sc-title{font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--steel3);
+  text-align:center;margin-bottom:12px}
+.sc-row{display:flex;align-items:center;gap:14px;padding:16px 14px;
+  border-radius:12px;cursor:pointer;background:var(--bg3);
+  margin-bottom:8px;border:1px solid var(--b2);transition:all .15s}
+.sc-row:active{background:rgba(232,160,32,.1);transform:scale(.98)}
+.sc-icon{width:44px;height:44px;border-radius:11px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:22px}
+.sc-icon.photo{background:rgba(80,160,80,.22)}
+.sc-icon.video{background:rgba(80,110,200,.22)}
+.sc-icon.file{background:rgba(232,160,32,.18)}
+.sc-text{flex:1;min-width:0}
+.sc-name{font-size:15px;font-weight:700;color:var(--steel);margin-bottom:2px}
+.sc-sub{font-size:11px;color:var(--steel2);line-height:1.4}
+.sc-arrow{font-size:18px;color:var(--steel3);flex-shrink:0}
+.sc-cancel{display:block;width:100%;margin-top:10px;
+  padding:14px;background:transparent;border:1px solid var(--b2);
+  border-radius:11px;color:var(--steel2);font-size:14px;font-weight:600;
+  font-family:inherit;cursor:pointer;-webkit-appearance:none}
+.sc-cancel:active{background:var(--bg3)}
 </style>
 </head>
 <body>
@@ -255,7 +293,7 @@ body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
       <!-- SEND -->
       <div class="panel active" id="panel-send">
         <div class="xc" id="xc"><div class="xt"><span class="xn" id="xn">Sending...</span><span class="xp" id="xp">0%</span></div><div class="xb"><div class="xf" id="xf"></div></div><div class="xs" id="xs">Starting...</div></div>
-        <div class="portal-wrap" onclick="document.getElementById('af').click()">
+        <div class="portal-wrap" onclick="showSendChooser()">
           <div class="send-portal">
             <div class="sp-halo"></div>
             <svg class="sp-rings" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
@@ -355,6 +393,31 @@ body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
   <div class="bb">
     <button class="bbs" onclick="goRec()">Browse Desktop</button>
     <button class="bbp" onclick="document.getElementById('af').click()">Send Files</button>
+  </div>
+</div>
+
+<!-- Send chooser sheet — Photo / Video / File picker -->
+<div class="sc-overlay" id="scOverlay" onclick="if(event.target===this)hideSendChooser()">
+  <div class="sc-sheet">
+    <div class="sc-handle"></div>
+    <div class="sc-title">What do you want to send?</div>
+    <div class="sc-row" onclick="pickAndHide('pf')">
+      <div class="sc-icon photo">🖼️</div>
+      <div class="sc-text">
+        <div class="sc-name">Photo or Video</div>
+        <div class="sc-sub">From your camera roll</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+    <div class="sc-row" onclick="pickAndHide('af')">
+      <div class="sc-icon file">📁</div>
+      <div class="sc-text">
+        <div class="sc-name">File</div>
+        <div class="sc-sub">PDF, document, audio, anything from Files</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>
+    <button class="sc-cancel" onclick="hideSendChooser()">Cancel</button>
   </div>
 </div>
 
