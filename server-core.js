@@ -97,6 +97,17 @@ async function start() {
   generateProfile(ip);
 
   const expressApp = express();
+  // Verbose request logger — every incoming request is logged with method,
+  // path, content-length, and client IP. Critical for diagnosing why
+  // iPhone uploads fail silently (we now see exactly which requests reach
+  // the server vs which get dropped at the network/cert layer).
+  expressApp.use((req,res,next) => {
+    const cl = req.headers['content-length'] || '-';
+    const ip = req.socket.remoteAddress || '-';
+    const proto = req.socket.encrypted ? 'HTTPS' : 'HTTP';
+    console.log(`[IRONBEAM] ${proto} ${req.method} ${req.url} from ${ip} (${cl} bytes)`);
+    next();
+  });
   expressApp.use((req,res,next) => {
     res.header('Access-Control-Allow-Origin','*');
     res.header('Access-Control-Allow-Methods','GET,POST,DELETE,OPTIONS');
@@ -142,14 +153,33 @@ async function start() {
       cb(null, fs.existsSync(dest) ? `${base}_${Date.now()}${ext}` : file.originalname);
     },
   });
+  // No file-size limit — let iPhone upload anything up to memory limit.
+  // If we ever need to cap, add { limits: { fileSize: N } } here.
   const upload = multer({ storage });
-  expressApp.post('/upload', upload.single('file'), (req,res) => {
-    if (!req.file) return res.status(400).json({ error:'No file' });
+  expressApp.post('/upload', (req,res,next) => {
+    upload.single('file')(req, res, err => {
+      if (err) {
+        console.error('[IRONBEAM] Upload multer error:', err.message, err.code || '');
+        return res.status(500).json({ error: 'Upload failed', detail: err.message });
+      }
+      next();
+    });
+  }, (req,res) => {
+    if (!req.file) {
+      console.error('[IRONBEAM] Upload received but no file field — content-type:', req.headers['content-type']);
+      return res.status(400).json({ error:'No file' });
+    }
     const info = { name:req.file.filename, size:req.file.size, path:req.file.path };
     console.log('[IRONBEAM] Received:', info.name, fmt(info.size));
     _fileReceivedCbs.forEach(cb => cb(info));
     _wss?.clients.forEach(c => c.readyState===1 && c.send(JSON.stringify({ event:'file-received', ...info })));
     res.json({ ok:true, file:info });
+  });
+
+  // Catch-all error handler — logs anything Express bubbles up
+  expressApp.use((err, req, res, next) => {
+    console.error('[IRONBEAM] Unhandled error on', req.method, req.url, '—', err.message);
+    res.status(500).json({ error: err.message });
   });
 
   expressApp.delete('/files/:name', (req,res) => {

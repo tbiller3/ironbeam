@@ -63,8 +63,19 @@ function createWindow() {
   const iconPath = getIconPath('icon.png');
   mainWindow = new BrowserWindow({
     width: 960, height: 660, minWidth: 800, minHeight: 560,
-    show: false, frame: false, backgroundColor: '#08080f',
+    show: false, backgroundColor: '#08080f',
     icon: iconPath || undefined,
+    // titleBarStyle:'hidden' + titleBarOverlay puts Windows-native min/max/
+    // close buttons over our custom titlebar — which restores Windows 11
+    // Snap Layouts (the half/quarter screen menu) on hover over maximize.
+    // Custom buttons can't trigger that OS-level UI; only the real caption
+    // buttons can. We hide our own .win-controls in CSS when on Windows.
+    titleBarStyle: 'hidden',
+    titleBarOverlay: process.platform === 'win32' ? {
+      color:        '#08080f',
+      symbolColor:  '#e8a020',
+      height:       36,
+    } : false,
     webPreferences: {
       nodeIntegration: false, contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
