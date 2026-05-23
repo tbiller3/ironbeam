@@ -188,6 +188,13 @@ body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
 .inst-status.ok{color:var(--green)}
 .inst-status.err{color:var(--red)}
 .inst-status.busy{color:var(--beam2)}
+/* Tap feedback for clickable rows + header chip + brand */
+.row[style*="cursor:pointer"]:active,
+.hc[style*="cursor:pointer"]:active,
+.ht[style*="cursor:pointer"]:active,
+.hl[style*="cursor:pointer"]:active{
+  background:rgba(232,160,32,.08);
+}
 
 /* ── Send chooser sheet (Photo vs File picker) ── */
 .sc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);
@@ -274,11 +281,11 @@ body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
 <div class="screen" id="sApp">
   <div class="sb2"><span class="sbt" id="sbTime">9:41</span><span style="font-size:12px;color:var(--steel2)">▲ ●●● 🔋</span></div>
   <div class="hd">
-    <div class="hl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12 L12 3 L20 12 L12 21 Z" stroke="#e8a020" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="#e8a020"/></svg></div>
-    <span class="ht">IRONBEAM</span>
+    <div class="hl" onclick="goTab('send')" title="Home" style="cursor:pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 12 L12 3 L20 12 L12 21 Z" stroke="#e8a020" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="#e8a020"/></svg></div>
+    <span class="ht" onclick="window.open('https://ironbeam.ca','_blank')" title="Open ironbeam.ca" style="cursor:pointer">IRONBEAM</span>
     <div class="h-right">
       <button class="h-share" onclick="shareApp()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Share</button>
-      <div class="hc"><div class="dot on" id="dot"></div><span class="dlb" id="dlb">Connected</span></div>
+      <div class="hc" onclick="goTab('settings')" title="Connection status — tap for settings" style="cursor:pointer"><div class="dot on" id="dot"></div><span class="dlb" id="dlb">Connected</span></div>
     </div>
   </div>
   <div class="tabs">
@@ -360,10 +367,10 @@ body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
       <div class="panel" id="panel-settings">
         <div class="card">
           <div class="ct">Connection</div>
-          <div class="row"><span class="rl">Desktop IP</span><span class="rv" id="sip">—</span></div>
-          <div class="row"><span class="rl">Status</span><span class="rv" id="sst" style="color:var(--green)">Connected</span></div>
-          <div class="row"><span class="rl">Encryption</span><span class="rv">HTTPS · TLS</span></div>
-          <div class="row"><span class="rl">Port</span><span class="rv">7443</span></div>
+          <div class="row" onclick="copyDesktopIp()" style="cursor:pointer"><span class="rl">Desktop IP</span><span class="rv" id="sip">—</span></div>
+          <div class="row" onclick="toast('Status: '+document.getElementById('sst').textContent)" style="cursor:pointer"><span class="rl">Status</span><span class="rv" id="sst" style="color:var(--green)">Connected</span></div>
+          <div class="row" onclick="toast('TLS — encrypted iPhone↔PC transfer')" style="cursor:pointer"><span class="rl">Encryption</span><span class="rv">HTTPS · TLS</span></div>
+          <div class="row" onclick="copyPort()" style="cursor:pointer"><span class="rl">Port</span><span class="rv" id="sport">7443</span></div>
         </div>
         <div class="card">
           <div class="ct">Appearance</div>
@@ -380,10 +387,10 @@ body.ib-light .bbs{background:var(--bg3);color:var(--beam2)}
         </div>
         <div class="card">
           <div class="ct">About</div>
-          <div class="row"><span class="rl">App</span><span class="rv">IRONBEAM v1.3</span></div>
-          <div class="row"><span class="rl">Protocol</span><span class="rv">UTP/1.0</span></div>
-          <div class="row"><span class="rl">Copyright</span><span class="rv">© 2025 IRONBEAM Technologies</span></div>
-          <div class="row"><span class="rl">Website</span><span class="rv" style="color:var(--beam2)">ironbeam.ca</span></div>
+          <div class="row" onclick="toast('IRONBEAM Phone v1.3 — Unrestricted Transfer Protocol')" style="cursor:pointer"><span class="rl">App</span><span class="rv">IRONBEAM v1.3</span></div>
+          <div class="row" onclick="toast('Unrestricted Transfer Protocol v1.0')" style="cursor:pointer"><span class="rl">Protocol</span><span class="rv">UTP/1.0</span></div>
+          <div class="row" onclick="window.open('https://ironbeam.ca','_blank')" style="cursor:pointer"><span class="rl">Copyright</span><span class="rv">© 2025 IRONBEAM Technologies</span></div>
+          <div class="row" onclick="window.open('https://ironbeam.ca','_blank')" style="cursor:pointer"><span class="rl">Website</span><span class="rv" style="color:var(--beam2)">ironbeam.ca ↗</span></div>
         </div>
         <button class="disc" onclick="disconnect()">Disconnect</button>
       </div>
@@ -493,6 +500,9 @@ function showApp(){
   document.getElementById('sConnect').classList.remove('active');
   document.getElementById('sApp').classList.add('active');
   document.getElementById('sip').textContent=S.ip;
+  // Reflect the actual port we're connected on (HTTP=7878 / HTTPS=7443)
+  const portEl=document.getElementById('sport');
+  if(portEl)portEl.textContent=getProto().port;
 }
 
 function openWS(){
@@ -627,6 +637,26 @@ async function shareApp(){
   }
 }
 function goRec(){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelector('[data-tab="receive"]').classList.add('active');document.getElementById('panel-receive').classList.add('active');loadD();}
+// Generic tab switcher — used by header chip and other shortcuts
+function goTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const tab=document.querySelector('[data-tab="'+name+'"]');
+  const pan=document.getElementById('panel-'+name);
+  if(tab)tab.classList.add('active');
+  if(pan)pan.classList.add('active');
+  if(name==='receive')loadD();
+  if(name==='history')renderH();
+}
+async function copyDesktopIp(){
+  try{await navigator.clipboard.writeText(S.ip||'');toast('Desktop IP copied','ok');}
+  catch(e){toast(S.ip||'(no IP set)');}
+}
+async function copyPort(){
+  const p=document.getElementById('sport').textContent;
+  try{await navigator.clipboard.writeText(p);toast('Port '+p+' copied','ok');}
+  catch(e){toast('Port '+p);}
+}
 function renderQ(){const c=document.getElementById('qc'),l=document.getElementById('ql');if(!S.q.length){c.style.display='none';return;}c.style.display='block';l.innerHTML=S.q.map(f=>`<div class="fr"><div class="fi">${em(f.name)}</div><div class="fm"><div class="fn">${esc(f.name)}</div><div class="fo">${fmt(f.size)} · queued</div></div><div class="fa" style="color:var(--steel3);font-size:14px">⏳</div></div>`).join('');}
 
 function addH(d,n,s){S.hist.unshift({d,n,s,t:Date.now()});if(S.hist.length>50)S.hist.pop();localStorage.setItem('ib_h',JSON.stringify(S.hist));renderH();}
