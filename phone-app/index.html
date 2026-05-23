@@ -502,6 +502,28 @@ async function connect(){
 
 function disconnect(){if(S.ws){S.ws.close();S.ws=null;}S.base='';document.getElementById('sApp').classList.remove('active');document.getElementById('sConnect').classList.add('active');toast('Disconnected');}
 
+// ── Send chooser sheet — Photo vs File picker ────────────────────────────────
+// These three functions are referenced from onclick attributes (portal +
+// the chooser-sheet rows). Without them, every tap of the portal throws
+// a ReferenceError and breaks the rest of the page's interactivity.
+function showSendChooser(){
+  const o = document.getElementById('scOverlay');
+  if (o) o.classList.add('show');
+}
+function hideSendChooser(){
+  const o = document.getElementById('scOverlay');
+  if (o) o.classList.remove('show');
+}
+function pickAndHide(inputId){
+  hideSendChooser();
+  // Tiny delay so the sheet animates closed before the iOS picker pops up.
+  // Also avoids iOS sometimes ignoring synthetic clicks during animation.
+  setTimeout(() => {
+    const el = document.getElementById(inputId);
+    if (el) el.click();
+  }, 80);
+}
+
 function showApp(){
   document.getElementById('sConnect').classList.remove('active');
   document.getElementById('sApp').classList.add('active');
