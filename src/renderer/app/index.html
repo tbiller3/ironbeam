@@ -903,28 +903,33 @@ const VERIFY_URL = 'https://ironbeam.ca/pro/verify.php';
 const CHECKOUT_URL = 'https://ironbeam.ca/pro/checkout.php';
 const DEV_LICENSE_KEY = 'BEAM-DEV-F96CE2-3EC9F1';
 
-// Auto-grant developer/owner license on first launch so the build never
-// hits the free-tier modal when the dev runs their own app. This is the
-// same bypass key recognized by activateLicense() — pre-seeding it just
-// removes the friction of pasting it manually after every reinstall.
-if (!localStorage.getItem('ib-pro-key')) {
-  localStorage.setItem('ib-pro-key',   DEV_LICENSE_KEY);
-  localStorage.setItem('ib-pro-email', 'developer@ironbeam.ca');
-}
+// === DEVELOPER BUILD ===
+// Unconditionally grant Pro on every launch. This is the owner's local
+// build — the 5-transfer free-tier modal should NEVER fire on this
+// machine regardless of what localStorage contained before. We force-set
+// the license key and email so updateProUI() renders the green "IRONBEAM
+// Pro — Unlimited transfers" pill, AND we hard-code isPro = true in the
+// state object below so even if updateProUI fires before this line ran,
+// the limit check in checkFreeLimit() still passes through.
+localStorage.setItem('ib-pro-key',   DEV_LICENSE_KEY);
+localStorage.setItem('ib-pro-email', 'developer@ironbeam.ca');
+// Also clear any stale transfer counters so the counter never matters
+localStorage.removeItem('ib-xfers');
+localStorage.removeItem('ib-bytes');
 
 let _activeRamp = null;
 let _selectedPlan = 'yearly'; // default to best value
 let state = {
   files:           [],
   phoneFileList:   [],
-  totalTransfers:  parseInt(localStorage.getItem('ib-xfers') || '0'),
-  totalBytes:      parseInt(localStorage.getItem('ib-bytes') || '0'),
+  totalTransfers:  0,
+  totalBytes:      0,
   serverInfo:      null,
   phoneConnected:  false,
   phoneIp:         null,
-  isPro:           localStorage.getItem('ib-pro-key') ? true : false,
-  proKey:          localStorage.getItem('ib-pro-key') || null,
-  proEmail:        localStorage.getItem('ib-pro-email') || null,
+  isPro:           true,                     // ← hard-on for dev build
+  proKey:          DEV_LICENSE_KEY,
+  proEmail:        'developer@ironbeam.ca',
 };
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
@@ -1292,10 +1297,8 @@ function updateProUI() {
 }
 
 function checkFreeLimit() {
-  if (state.isPro) return true;          // Pro — always allow
-  if (state.totalTransfers < FREE_LIMIT) return true; // Under limit
-  showUpgradeModal();
-  return false;
+  // Dev build: always allow. Free-tier code path is dead in this build.
+  return true;
 }
 
 function showUpgradeModal() {
