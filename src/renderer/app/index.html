@@ -511,6 +511,22 @@ body.ib-lite .wh-core::after {
 /* ── Clickable value cells ── */
 .clickable{cursor:pointer;transition:color .15s}
 .clickable:hover{color:var(--beam2) !important;text-decoration:underline}
+/* Subtle hover for clickable titles, labels, and chips */
+.panel-title[style*="cursor:pointer"]:hover,
+.panel-sub[style*="cursor:pointer"]:hover,
+.ts-label[style*="cursor:pointer"]:hover,
+.tb-status[style*="cursor:pointer"]:hover,
+.device-card[style*="cursor:pointer"]:hover,
+.step-card[style*="cursor:pointer"]:hover,
+.phone-conn-banner[style*="cursor:pointer"]:hover,
+.wh-label[style*="cursor:pointer"]:hover{
+  filter:brightness(1.18);
+  transition:filter .15s ease;
+}
+.step-card[style*="cursor:pointer"]:hover{
+  border-color:var(--b1) !important;
+  box-shadow:0 0 0 1px var(--b1);
+}
 .dc-ip:hover{color:var(--beam2);transition:color .15s}
 .qr-url:hover{color:var(--beam2);text-decoration:underline}
 .xfer-stats:hover .xs-val{color:var(--beam2)}
@@ -543,7 +559,7 @@ body.ib-lite .wh-core::after {
     <span class="tb-brand">IRONBEAM</span>
   </div>
   <div class="tb-spacer"></div>
-  <div class="tb-status">
+  <div class="tb-status" onclick="switchPanel('settings')" title="Click for server status & settings" style="cursor:pointer">
     <div class="tb-dot" id="tbDot"></div>
     <span class="tb-status-text" id="tbStatus">Starting...</span>
   </div>
@@ -591,12 +607,12 @@ body.ib-lite .wh-core::after {
     </div>
 
     <div class="nav-bottom">
-      <div class="device-card">
+      <div class="device-card" onclick="if(!state.phoneConnected)switchPanel('connect');else showToast('iPhone connected · ' + (state.phoneIp || ''),'ok');" title="iPhone connection status — click for details" style="cursor:pointer">
         <div class="dc-head">
           <div class="dc-dot" id="deviceDot"></div>
           <span class="dc-label" id="deviceLabel">No device</span>
         </div>
-        <div class="dc-ip" id="deviceIp" onclick="copyToClipboard(this.textContent)" title="Click to copy IP:port" style="cursor:pointer">—</div>
+        <div class="dc-ip" id="deviceIp" onclick="event.stopPropagation();copyToClipboard(this.textContent)" title="Click to copy IP:port" style="cursor:pointer">—</div>
       </div>
     </div>
   </div>
@@ -607,14 +623,14 @@ body.ib-lite .wh-core::after {
     <!-- TRANSFER PANEL -->
     <div class="panel active" id="panel-transfer" style="position:relative">
       <div class="panel-header">
-        <div class="panel-title">Transfer</div>
-        <div class="panel-sub">Drag files between your devices</div>
+        <div class="panel-title" onclick="refreshDesktopFiles();showToast('Refreshed','ok')" title="Click to refresh" style="cursor:pointer">Transfer</div>
+        <div class="panel-sub clickable" onclick="switchPanel('connect')" title="How to connect iPhone" style="cursor:pointer">Drag files between your devices · Click for setup help</div>
       </div>
       <div class="transfer-layout" style="flex:1;overflow:hidden">
         <!-- Desktop side -->
         <div class="transfer-side">
           <div class="ts-head">
-            <span class="ts-label">💻 Desktop</span>
+            <span class="ts-label" onclick="IB.openTransferFolder()" title="Open desktop transfer folder" style="cursor:pointer">💻 Desktop</span>
             <button class="ts-action" onclick="IB.openTransferFolder()">Open folder</button>
           </div>
           <div class="file-scroll" id="desktopFiles">
@@ -699,7 +715,7 @@ body.ib-lite .wh-core::after {
             <div class="wh-flash"         id="whFlash"></div>
             <div class="wh-lite-pulse"   id="whLitePulse"></div>
           </div>
-          <div class="wh-label" id="whLabel">IRONBEAM</div>
+          <div class="wh-label" id="whLabel" onclick="IB_IS_ELECTRON&&IB.openExternal?IB.openExternal('https://ironbeam.ca'):window.open('https://ironbeam.ca','_blank')" title="Open ironbeam.ca" style="cursor:pointer">IRONBEAM</div>
           <button class="xfer-cancel" id="xferCancel" onclick="cancelTransfer()">✕ Cancel</button>
           <div class="xfer-stats" style="margin-top:4px;cursor:pointer" onclick="switchPanel('files')" title="View all files">
             <div class="xs-val" id="xferCount">0</div>
@@ -713,17 +729,17 @@ body.ib-lite .wh-core::after {
         <!-- iPhone side -->
         <div class="transfer-side">
           <div class="ts-head">
-            <span class="ts-label">📱 iPhone</span>
-            <span id="phoneConnStatus" style="font-size:10px;color:var(--steel3);cursor:pointer" onclick="if(!state.phoneConnected)switchPanel('connect')" title="Click to connect iPhone">Not connected</span>
+            <span class="ts-label" onclick="switchPanel('connect')" title="Open iPhone connect panel" style="cursor:pointer">📱 iPhone</span>
+            <span id="phoneConnStatus" style="font-size:10px;color:var(--steel3);cursor:pointer" onclick="if(!state.phoneConnected)switchPanel('connect');else showToast('iPhone connected · ' + (state.phoneIp || ''),'ok');" title="Click for iPhone status">Not connected</span>
           </div>
           <div class="file-scroll" id="phoneFiles" style="display:flex;flex-direction:column;padding:0">
-            <div class="phone-conn-banner" id="phoneConnBanner">
+            <div class="phone-conn-banner" id="phoneConnBanner" onclick="copyToClipboard(state.phoneIp || '');showToast('iPhone IP copied','ok')" title="Click to copy iPhone IP" style="cursor:pointer">
               <div class="pcb-dot"></div>
               <div class="pcb-text">
                 <span class="pcb-label">iPhone Connected</span>
                 <span class="pcb-ip" id="pcbIp"></span>
               </div>
-              <span class="pcb-hint">Tap 📤 to send</span>
+              <span class="pcb-hint">Tap to copy IP</span>
             </div>
             <div style="flex:1;overflow-y:auto;padding:8px" id="phoneFileInner">
               <div class="empty-state" id="phoneEmpty">
@@ -748,8 +764,8 @@ body.ib-lite .wh-core::after {
     <!-- FILES PANEL -->
     <div class="panel" id="panel-files">
       <div class="panel-header">
-        <div class="panel-title">Files</div>
-        <div class="panel-sub" id="filesCount">0 files in transfer folder</div>
+        <div class="panel-title" onclick="refreshDesktopFiles();showToast('File list refreshed','ok')" title="Click to refresh" style="cursor:pointer">Files</div>
+        <div class="panel-sub clickable" id="filesCount" onclick="IB.openTransferFolder()" title="Click to open transfer folder" style="cursor:pointer">0 files in transfer folder</div>
       </div>
       <div class="files-toolbar">
         <input class="search-box" type="text" id="fileSearch" placeholder="Search files..." oninput="filterFiles()"/>
@@ -790,15 +806,15 @@ body.ib-lite .wh-core::after {
           <div class="qr-url" id="connectUrl" onclick="copyToClipboard(this.textContent)" title="Click to copy" style="cursor:pointer">Starting server...</div>
         </div>
         <div class="steps-grid">
-          <div class="step-card">
+          <div class="step-card" onclick="copyToClipboard(document.getElementById('connectUrl').textContent);showToast('URL copied — paste into iPhone Safari','ok')" title="Click to copy URL" style="cursor:pointer">
             <div class="step-num">01</div>
             <div class="step-text">Open the URL above in iPhone Safari — tap the address bar and type it in</div>
           </div>
-          <div class="step-card">
+          <div class="step-card" onclick="IB_IS_ELECTRON&&IB.openExternal?IB.openExternal('http://'+state.serverInfo.ip+':'+(state.serverInfo.portHttp||7878)+'/install'):window.open('http://'+state.serverInfo.ip+':'+(state.serverInfo.portHttp||7878)+'/install','_blank')" title="Open the certificate install link" style="cursor:pointer">
             <div class="step-num">02</div>
             <div class="step-text">First time only: install the IRONBEAM certificate via Settings when prompted</div>
           </div>
-          <div class="step-card">
+          <div class="step-card" onclick="copyToClipboard(state.serverInfo.ip);showToast('IP copied — paste into iPhone IRONBEAM app','ok')" title="Click to copy your IP" style="cursor:pointer">
             <div class="step-num">03</div>
             <div class="step-text">Enter your IP address in the app and tap Connect — green dot means you're live</div>
           </div>
@@ -809,7 +825,7 @@ body.ib-lite .wh-core::after {
     <!-- SETTINGS PANEL -->
     <div class="panel" id="panel-settings">
       <div class="panel-header">
-        <div class="panel-title">Settings</div>
+        <div class="panel-title" onclick="showToast('All your settings — click any row to interact','ok')" title="Settings" style="cursor:pointer">Settings</div>
       </div>
       <div class="settings-body">
         <div class="setting-group">
@@ -826,12 +842,12 @@ body.ib-lite .wh-core::after {
             </div>
           </div>
           <div class="setting-row"><span class="sr-label">iPhone URL</span><span class="sr-val highlight clickable" id="setUrl" onclick="copyToClipboard(this.textContent)" title="Click to copy">—</span><button class="copy-btn" onclick="copyToClipboard(document.getElementById('setUrl').textContent)">Copy</button></div>
-          <div class="setting-row"><span class="sr-label">Status</span><span class="sr-val highlight" id="setStatus">Starting...</span></div>
+          <div class="setting-row"><span class="sr-label">Status</span><span class="sr-val highlight clickable" id="setStatus" onclick="showToast('Server: '+this.textContent+' · '+(state.serverInfo?.ip||'')+':'+(state.serverInfo?.portHttp||7878)+' (HTTP) / '+(state.serverInfo?.portHttps||7443)+' (HTTPS)','ok')" title="Click for server details" style="cursor:pointer">Starting...</span></div>
         </div>
         <div class="setting-group">
           <div class="sg-title">Storage</div>
-          <div class="setting-row"><span class="sr-label">Transfer folder</span><span class="sr-val" id="setDir" style="max-width:260px;overflow:hidden;text-overflow:ellipsis">—</span></div>
-          <div class="setting-row"><span class="sr-label">Files stored</span><span class="sr-val" id="setCount">0</span></div>
+          <div class="setting-row"><span class="sr-label">Transfer folder</span><span class="sr-val clickable" id="setDir" onclick="IB.openTransferFolder()" title="Click to open folder" style="max-width:260px;overflow:hidden;text-overflow:ellipsis;cursor:pointer">—</span><button class="copy-btn" onclick="IB.openTransferFolder()">Open</button></div>
+          <div class="setting-row"><span class="sr-label">Files stored</span><span class="sr-val clickable" id="setCount" onclick="switchPanel('files')" title="Click to view all files" style="cursor:pointer">0</span></div>
         </div>
         <div class="setting-group">
           <div class="sg-title">Pro License</div>
@@ -869,9 +885,9 @@ body.ib-lite .wh-core::after {
         </div>
         <div class="setting-group">
           <div class="sg-title">About</div>
-          <div class="setting-row"><span class="sr-label">Version</span><span class="sr-val">2.0.0</span></div>
-          <div class="setting-row"><span class="sr-label">Protocol</span><span class="sr-val">UTP/1.0 · HTTPS · AES-256</span></div>
-          <div class="setting-row"><span class="sr-label">Copyright</span><span class="sr-val">© 2025 IRONBEAM Technologies</span></div>
+          <div class="setting-row"><span class="sr-label">Version</span><span class="sr-val clickable" onclick="showToast('IRONBEAM 2.0.0 — Developer build · BEAM-DEV license active','ok')" title="Click for version details" style="cursor:pointer">2.0.0</span></div>
+          <div class="setting-row"><span class="sr-label">Protocol</span><span class="sr-val clickable" onclick="showToast('Unrestricted Transfer Protocol over HTTPS with AES-256 encryption','ok')" title="Click for protocol details" style="cursor:pointer">UTP/1.0 · HTTPS · AES-256</span></div>
+          <div class="setting-row"><span class="sr-label">Copyright</span><span class="sr-val clickable" onclick="IB_IS_ELECTRON&&IB.openExternal?IB.openExternal('https://ironbeam.ca'):window.open('https://ironbeam.ca','_blank')" title="Visit ironbeam.ca" style="cursor:pointer">© 2025 IRONBEAM Technologies</span></div>
           <div class="setting-row"><span class="sr-label">Website</span><span class="sr-val highlight clickable" onclick="IB_IS_ELECTRON&&IB.openExternal?IB.openExternal('https://ironbeam.ca'):window.open('https://ironbeam.ca','_blank')" title="Open ironbeam.ca">ironbeam.ca ↗</span></div>
         </div>
       </div>
