@@ -89,8 +89,14 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--steel);font-fa
 @keyframes sp-cspin{to{rotate:360deg}}
 
 /* Transfer progress */
-.xc{background:rgba(232,160,32,.08);border:1px solid var(--b1);border-radius:12px;padding:14px;display:none}
-.xc.show{display:block}
+.xc{background:linear-gradient(135deg,rgba(232,160,32,.18),rgba(232,100,0,.08));border:2px solid var(--beam);border-radius:14px;padding:18px;display:none;
+  box-shadow:0 0 0 4px rgba(232,160,32,.1),0 12px 32px rgba(232,140,0,.25);
+  position:relative}
+.xc.show{display:block;animation:xc-pop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes xc-pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+.xc::before{content:'📤  SENDING TO PC';position:absolute;top:-9px;left:14px;
+  background:var(--beam);color:#08080f;font-size:9px;font-weight:800;
+  letter-spacing:.14em;padding:3px 10px;border-radius:10px}
 .xt{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .xn{font-size:13px;font-weight:600;color:var(--beam2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:75%}
 .xp{font-size:13px;font-weight:700;color:var(--beam2)}
@@ -562,6 +568,21 @@ function gotFiles(files){
   sendPhoneFileList();
   S.q.push(...files);
   renderQ();
+  // Immediate visible confirmation that iOS handed us the file
+  const names = Array.from(files).map(f=>f.name).join(', ');
+  toast('📤 ' + (files.length===1 ? '"'+names+'" picked — uploading…' : files.length+' files picked — uploading…'), 'ok');
+  // Pre-show the upload card with the first filename so the user sees
+  // SOMETHING happening before XHR progress events arrive
+  const xc = document.getElementById('xc');
+  const xn = document.getElementById('xn');
+  const xs = document.getElementById('xs');
+  if (xc && xn && xs) {
+    xc.classList.add('show');
+    xn.textContent = files[0].name;
+    xs.textContent = 'Preparing upload…';
+    // Smooth-scroll the upload card into view so user can see progress
+    setTimeout(()=>xc.scrollIntoView({behavior:'smooth',block:'center'}), 50);
+  }
   if(!S.busy)nextUp();
   document.querySelectorAll('input[type=file]').forEach(i=>i.value='');
 }
