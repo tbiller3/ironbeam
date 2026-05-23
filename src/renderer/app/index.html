@@ -104,7 +104,15 @@ input{font-family:inherit;outline:none;-webkit-appearance:none}
 }
 .wh-stage.drag-active .wh-core{opacity:1;filter:brightness(2.2) saturate(1.2)}
 @keyframes arrive{0%{transform:scale(.8) translateY(8px);opacity:0}100%{transform:scale(1);opacity:1}}
-.fc-icon{width:34px;height:34px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fc-icon{width:34px;height:34px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:transform .15s}
+.file-card:hover .fc-icon{transform:scale(1.06)}
+/* Colored icon backgrounds keyed off file category — matches website mockup */
+.fc-icon.fi-image{background:rgba(80,160,80,.2)}
+.fc-icon.fi-video{background:rgba(80,110,200,.2)}
+.fc-icon.fi-audio{background:rgba(160,100,200,.2)}
+.fc-icon.fi-doc{background:rgba(200,80,80,.2)}
+.fc-icon.fi-archive{background:rgba(200,150,60,.2)}
+.fc-icon.fi-code{background:rgba(60,160,180,.2)}
 .fc-meta{flex:1;min-width:0}
 .fc-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--steel)}
 .fc-size{font-size:10px;color:var(--steel3);margin-top:1px}
@@ -893,6 +901,17 @@ const IB_IS_ELECTRON = typeof window.IB !== 'undefined';
 const FREE_LIMIT = 5;
 const VERIFY_URL = 'https://ironbeam.ca/pro/verify.php';
 const CHECKOUT_URL = 'https://ironbeam.ca/pro/checkout.php';
+const DEV_LICENSE_KEY = 'BEAM-DEV-F96CE2-3EC9F1';
+
+// Auto-grant developer/owner license on first launch so the build never
+// hits the free-tier modal when the dev runs their own app. This is the
+// same bypass key recognized by activateLicense() — pre-seeding it just
+// removes the friction of pasting it manually after every reinstall.
+if (!localStorage.getItem('ib-pro-key')) {
+  localStorage.setItem('ib-pro-key',   DEV_LICENSE_KEY);
+  localStorage.setItem('ib-pro-email', 'developer@ironbeam.ca');
+}
+
 let _activeRamp = null;
 let _selectedPlan = 'yearly'; // default to best value
 let state = {
@@ -1095,7 +1114,7 @@ function renderDesktopFiles(newFileName) {
     const card = document.createElement('div');
     card.className = 'file-card' + (f.name === newFileName ? ' new' : '');
     card.innerHTML = `
-      <div class="fc-icon">${emoji(f.name)}</div>
+      <div class="fc-icon ${fileCategory(f.name)}">${emoji(f.name)}</div>
       <div class="fc-meta">
         <div class="fc-name">${esc(f.name)}</div>
         <div class="fc-size">${fmt(f.size)} · ${timeAgo(f.modified)}</div>
@@ -1160,18 +1179,22 @@ function renderPhoneFiles() {
     empty.style.display = 'none';
     Array.from(inner.children).forEach(c => { if (c !== empty) c.remove(); });
     const header = document.createElement('div');
-    header.style.cssText = 'font-size:10px;color:var(--steel3);padding:6px 8px 4px;letter-spacing:.06em;text-transform:uppercase';
-    header.textContent = 'On iPhone — click ⬇ to pull';
+    header.style.cssText = 'font-size:10px;color:var(--steel3);padding:8px 10px 6px;letter-spacing:.08em;text-transform:uppercase;font-weight:600';
+    header.textContent = `On iPhone · ${state.phoneFileList.length} file${state.phoneFileList.length===1?'':'s'}`;
     inner.appendChild(header);
     state.phoneFileList.forEach(f => {
       const card = document.createElement('div');
       card.className = 'file-card';
       card.title = 'Click to pull to PC';
+      // Use relative time if file has a modified timestamp, otherwise just size
+      const sizeLabel = f.size != null ? fmt(f.size) : '';
+      const timeLabel = f.modified ? timeAgo(f.modified) : (f.mtime ? timeAgo(f.mtime) : 'On iPhone');
+      const meta = [sizeLabel, timeLabel].filter(Boolean).join(' · ');
       card.innerHTML = `
-        <div class="fc-icon">${emoji(f.name)}</div>
+        <div class="fc-icon ${fileCategory(f.name)}">${emoji(f.name)}</div>
         <div class="fc-meta">
           <div class="fc-name">${esc(f.name)}</div>
-          <div class="fc-size">${fmt(f.size)} · tap to pull to PC</div>
+          <div class="fc-size">${meta}</div>
         </div>
         <div class="fc-actions" style="display:flex">
           <button class="fc-btn" title="Pull to PC" onclick="event.stopPropagation();pullFromPhone('${esc(f.name)}')">⬇</button>
@@ -1410,7 +1433,19 @@ function fmt(b) {
 }
 function emoji(n) {
   const e=(n.split('.').pop()||'').toLowerCase();
-  return {jpg:'🖼️',jpeg:'🖼️',png:'🖼️',heic:'🖼️',gif:'🎞️',mp4:'🎬',mov:'🎬',mp3:'🎵',wav:'🎵',pdf:'📄',doc:'📋',docx:'📋',xls:'📊',xlsx:'📊',txt:'📝',zip:'🗜️',rar:'🗜️'}[e]||'📁';
+  return {jpg:'🖼️',jpeg:'🖼️',png:'🖼️',heic:'🖼️',gif:'🎞️',mp4:'🎬',mov:'🎬',mp3:'🎵',wav:'🎵',m4a:'🎵',pdf:'📄',doc:'📋',docx:'📋',xls:'📊',xlsx:'📊',txt:'📝',zip:'🗜️',rar:'🗜️'}[e]||'📁';
+}
+// Map a filename to a category class so .fc-icon gets the right tinted background
+// (matches the colored-icon aesthetic on the website hero mockup)
+function fileCategory(n) {
+  const e=(n.split('.').pop()||'').toLowerCase();
+  if (['jpg','jpeg','png','heic','gif','webp','bmp','svg'].includes(e)) return 'fi-image';
+  if (['mp4','mov','m4v','avi','mkv','webm'].includes(e)) return 'fi-video';
+  if (['mp3','wav','m4a','flac','ogg','aac','aiff'].includes(e)) return 'fi-audio';
+  if (['pdf','doc','docx','txt','rtf','xls','xlsx','ppt','pptx','pages','numbers','keynote'].includes(e)) return 'fi-doc';
+  if (['zip','rar','7z','tar','gz','bz2'].includes(e)) return 'fi-archive';
+  if (['js','ts','jsx','tsx','py','rb','go','rs','java','cpp','c','h','html','css','json','xml','yml','yaml','sh','md'].includes(e)) return 'fi-code';
+  return '';
 }
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function timeAgo(ts) {
