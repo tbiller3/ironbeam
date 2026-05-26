@@ -515,13 +515,12 @@ function hideSendChooser(){
   if (o) o.classList.remove('show');
 }
 function pickAndHide(inputId){
+  // Call click() BEFORE hiding the sheet — iOS Safari requires file input
+  // clicks to be synchronous and directly in the user-gesture call stack.
+  // Any setTimeout or async gap breaks the gesture chain and silently drops the click.
+  const el = document.getElementById(inputId);
+  if (el) el.click();
   hideSendChooser();
-  // Tiny delay so the sheet animates closed before the iOS picker pops up.
-  // Also avoids iOS sometimes ignoring synthetic clicks during animation.
-  setTimeout(() => {
-    const el = document.getElementById(inputId);
-    if (el) el.click();
-  }, 80);
 }
 
 function showApp(){
@@ -539,7 +538,11 @@ function openWS(){
     S.ws=new WebSocket(p.ws+'://'+S.ip+':'+p.port);
     S.ws.onclose=()=>{if(S.base)setTimeout(openWS,3000);};
     S.ws.onerror=()=>{};
-    S.ws.onopen=()=>{ sendPhoneFileList(); };
+    S.ws.onopen=()=>{
+      sendPhoneFileList();
+      // Re-send after short delay in case server needs a moment to register the connection
+      setTimeout(sendPhoneFileList, 800);
+    };
     S.ws.onmessage=(e)=>{
       try{
         const msg=JSON.parse(e.data);
@@ -640,6 +643,8 @@ async function upload(file){
         addH('↑',file.name,file.size);
         toast('Sent: '+file.name,'ok');
         setTimeout(()=>xc.classList.remove('show'),2000);
+        // Re-broadcast file list so PC panel updates after each successful send
+        sendPhoneFileList();
       }else{
         xs.textContent='Server error '+xhr.status;
         toast('Failed: '+file.name+' ('+xhr.status+')','err');
@@ -650,7 +655,10 @@ async function upload(file){
     xhr.ontimeout=()=>{toast('Timed out: '+file.name,'err');xc.classList.remove('show');res();};
     xhr.onerror=()=>{toast('Failed: '+file.name,'err');xc.classList.remove('show');res();};
     xhr.timeout=180000;
-    xhr.open('POST',S.base+'/upload');xhr.send(form);
+    // Always use HTTP (port 7878) for uploads — HTTPS requires cert trust
+    // which iOS may not have installed. HTTP is reliable on local Wi-Fi.
+    const uploadUrl = S.base.replace('https://','http://').replace(':7443',':7878') + '/upload';
+    xhr.open('POST', uploadUrl); xhr.send(form);
   });
 }
 
